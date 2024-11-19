@@ -1,0 +1,60 @@
+@import '../styles/colors/variables';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// :root {
+//   --background: #ffffff;
+//   --foreground: #171717;
+// }
+
+:root {
+  font-family: 'Titillium Web', sans-serif;
+  margin: 0;
+  height: 100%;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  align-content: flex-start;
+}
+
+@media (prefers-color-scheme: dark) {
+  // :root {
+  //   --background: #0a0a0a;
+  //   --foreground: #ededed;
+  // }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.host{
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  display: flex;
+  width: auto;
+  overflow: hidden;
+  
+  
+  .main-content {
+    padding: 10px; 
+    background-color: #f0f0f0;  
+    // flex:1;
+  }
+  
+  mat-icon {
+    cursor: pointer;
+    color: $global-blue;
+    transition: background-color 0.3s ease; 
+  } 
+}
