@@ -38,12 +38,15 @@ body {
 .host{
   display: flex;
   flex-direction: column;
+  padding: 20px;
+  background-color: #f0f0f0;  
 }
 
 .container {
-  display: flex;
+  // display: flex;
   width: auto;
   overflow: hidden;
+  background-color: #f0f0f0;  
   
   
   .main-content {

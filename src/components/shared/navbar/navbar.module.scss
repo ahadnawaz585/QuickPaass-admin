@@ -1,0 +1,114 @@
+// Navbar.module.scss
+@import '../../../styles/colors/variables';
+
+.navbar {
+    background-color: #f8f8f8;
+    height: 60px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .logo{
+        display: none;
+    }
+
+
+    .menu {
+        list-style-type: none;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+        display: flex;
+
+        .liLogo {
+            margin-right: 50px;
+        }
+
+        li {
+            margin-right: 20px;
+
+
+
+            .links {
+                cursor: pointer;
+                text-decoration: none;
+                color: #5f5f5f;
+                transition: color 0.3s ease;
+
+
+
+                &.active {
+                    color: $global-blue;
+                    font-weight: bold;
+                }
+
+                &:hover:not(.active) {
+                    color: #333;
+                }
+            }
+        }
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+    }
+
+   
+
+    h1 {
+        margin: 0;
+    }
+
+    .hamburgerIcon {
+        cursor: pointer;
+        display: none;
+    }
+
+    .account_circle,
+    .notification {
+        cursor: pointer;
+        display: flex;
+        // border: 1px solid black;
+        // padding: 5px;
+        align-items: center;
+        gap: 5px;
+        background-color: $global-blue;
+        border: 1px solid $global-blue;
+        border-radius: 5px;
+        padding: 3px;
+        color: white;
+        // color: $global-blue;
+    }
+
+}
+
+
+
+
+
+
+@media screen and (max-width: 768px) {
+    .navbar {
+
+        .menu {
+            display: none;
+        }
+
+        .logo{
+            display: block;
+        }
+
+        .hamburgerIcon {
+            display: block;
+        }
+    }
+
+}

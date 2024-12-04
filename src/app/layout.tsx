@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import React, { lazy, Suspense } from "react";
 import local from 'next/font/local';
-import Loader from "@/components/shared/Loader/Loader";
+import Loader from "@/components/shared/loader/Loader";
 // import Loading from "@/frontend/components/shared/loader/loader";
-// import Navbar from "@/frontend/components/navbar/navbar";
+import Navbar from "@/components/shared/navbar/navbar";
 import { StyledRoot } from "@/styles/Theme/theme";
 
 // import AuthService from "@/authentication/auth.service";
@@ -43,9 +43,9 @@ export default function RootLayout(
     <html lang="en">
       <body className={`${TitilliumWeb.className}`}>
         <div className="host">
-          {/* { <Navbar />} */}
+          { <Navbar />}
           {/* <p>{activePath}</p> */}
-          <div className="container">
+          <div >
             <div className="main-content"><Suspense fallback={<Loader />}> <StyledRoot>{children}</StyledRoot></Suspense></div>
           </div>
         </div>

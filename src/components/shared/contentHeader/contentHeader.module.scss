@@ -1,0 +1,29 @@
+@import '../../../styles/colors/variables';
+
+.content {
+  padding: 20px;
+
+  .headerTitle {
+padding-bottom: 20px;
+    color: $global-blue;
+    margin-top: -10px;
+    font-size: x-large;
+    font-weight: bold;
+  }
+
+  .container {
+    height: 5px;
+    display: flex;
+    align-items: center;
+
+    justify-content: space-between;
+
+    &.no-search {
+      justify-content: flex-end;
+    }
+  }
+
+  .chips {
+    margin-top: 20px;
+  }
+}

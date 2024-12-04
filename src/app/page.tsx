@@ -1,11 +1,16 @@
-import React from 'react'
+"use client"
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+export default function Home() {
+  const router = useRouter();
 
-const page = () => {
+  useEffect(() => {
+    router.push('/analytics');
+  });
+  
   return (
-    <div>
-      hi
-    </div>
-  )
-}
+    <>
 
-export default page
+    </>
+  );
+}
