@@ -6,12 +6,13 @@ import { User } from "@/types/schema/user";
 class AuthService {
   private cookieKey = "auth_token";
   private baseUrl = environment.apiUrl + "/auth";
-
+  private platform ='Admin';
   async login(credentials: User): Promise<any> {
+    let data= {...credentials,platform:this.platform}
     try {
       const response = await axios.post<any>(
         `${this.baseUrl}/login`,
-        credentials
+        data
       );
       if (response.data.token) {
         this.setToken(response.data.token);

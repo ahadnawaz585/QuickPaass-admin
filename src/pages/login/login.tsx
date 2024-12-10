@@ -26,7 +26,6 @@ const LoginForm: React.FC = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const data: User = { username, password, rememberMe };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -45,7 +44,7 @@ const LoginForm: React.FC = () => {
       }
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
-        setError('Invalid username or password.');
+        setError(error.response.data.message);
       } else {
         setError('An error occurred. Please try again later.');
       }

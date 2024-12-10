@@ -42,12 +42,14 @@ export default function RootLayout(
   return (
     <html lang="en">
       <body className={`${TitilliumWeb.className}`}>
-        <div className="host">
+        <div >
           { <Navbar />}
+        <div className="host">
           {/* <p>{activePath}</p> */}
           <div >
             <div className="main-content"><Suspense fallback={<Loader />}> <StyledRoot>{children}</StyledRoot></Suspense></div>
           </div>
+        </div>
         </div>
       </body>
     </html >

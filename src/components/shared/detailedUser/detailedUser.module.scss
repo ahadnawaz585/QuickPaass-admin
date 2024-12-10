@@ -1,0 +1,77 @@
+@import '../../../styles/colors/variables';
+
+
+.main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+.icon {
+    cursor: pointer;
+}
+
+.icons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+}
+
+
+.changePassword {
+    display: flex;  
+    flex-direction: column;
+    gap: 5px;
+}
+
+.alert{
+    margin-top:10px,
+}
+
+.passwordContainer {
+    margin-top: 10px;
+    border: 1px solid grey;
+    padding: 20px;
+    width:800px;
+    border-radius: 10px;
+
+}
+
+.userDetailsContainer {
+    padding: 20px;
+    border: 1px solid #0069b9;
+    border-radius: 5px;
+    background-color: #f5faff;
+
+    .title {
+        margin-bottom: 10px;
+        color: #0069b9;
+    }
+
+    .headerCell {
+        font-weight: bold;
+        color: #0069b9;
+    }
+
+    .tableContainer {
+        margin-top: 10px;
+        border: 1px solid #0069b9;
+        border-collapse: collapse;
+
+        .tableRow:nth-of-type(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .tableRow {
+            &:hover {
+                background-color: #e0e0e0;
+                cursor: pointer;
+            }
+        }
+    }
+}
