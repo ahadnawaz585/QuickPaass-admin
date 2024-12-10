@@ -45,7 +45,7 @@ const Logo = () => {
           height={10}
           width={50}
           priority={false}
-          className="hidden md:block cursor-pointer"
+          className="cursor-pointer"
           src={logo || "/logo.png"} // Fallback to default logo
         />
       )}

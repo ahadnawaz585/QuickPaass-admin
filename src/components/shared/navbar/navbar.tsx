@@ -27,18 +27,18 @@ import UserService from '@/service/user.service';
 
 const Navbar: React.FC = () => {
   const [showHeader, setShowHeader] = useState<boolean>(false);
-  const [showSetting, setShowSetting] = useState<boolean>(false);
+  // const [showSetting, setShowSetting] = useState<boolean>(false);
   const [showCa, setShowCa] = useState<boolean>(false);
-  const [showUser, setShowUser] = useState<boolean>(false);
   const [showProfile, setShowProfile] = useState<boolean>(false);
+  const [showUser, setShowUser] = useState<boolean>(false);
   const [showGroup, setShowGroup] = useState<boolean>(false);
   const [showRole, setShowRole] = useState<boolean>(false);
-  const [showCompany, setShowCompany] = useState<boolean>(false);
-  const [showVoucher, setShowVoucher] = useState<boolean>(false);
-  const [showContact, setShowContact] = useState<boolean>(false);
-  const [showLedger, setShowLedger] = useState<boolean>(false);
-  const [openCompanyDialogue, setOpenCompanyDialogue] = useState(false);
-  const [openChangeCompanyDialogue, setOpenChangeCompanyDialogue] = useState(false);
+  // const [showCompany, setShowCompany] = useState<boolean>(false);
+  // const [showVoucher, setShowVoucher] = useState<boolean>(false);
+  // const [showContact, setShowContact] = useState<boolean>(false);
+  // const [showLedger, setShowLedger] = useState<boolean>(false);
+  // const [openCompanyDialogue, setOpenCompanyDialogue] = useState(false);
+  // const [openChangeCompanyDialogue, setOpenChangeCompanyDialogue] = useState(false);
 //   const companyService: CompanyService = new CompanyService();
   const [showSubMenu, setShowSubMenu] = useState<boolean>(false);
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null); // State for settings menu
@@ -58,17 +58,17 @@ const Navbar: React.FC = () => {
 
 
   const checkPermissions = async () => {
-    setShowCa(await permission("ca.*"));
+    // setShowCa(await permission("ca.*"));
     setShowProfile(await permission("profile.*"));
-    setShowVoucher(await permission("voucher.*"));
-    setShowContact(await permission("contact.*"));
-    setShowLedger(await permission("ledger.*"));
-    setShowSetting(await permission("setting.*"));
+    // setShowVoucher(await permission("voucher.*"));
+    // setShowContact(await permission("contact.*"));
+    // setShowLedger(await permission("ledger.*"));
+    // setShowSetting(await permission("setting.*"));
     setShowUser(await permission("user.*"));
     setShowRole(await permission("role.*"));
     setShowGroup(await permission("group.*"));
-    setShowCompany(await permission("company.*"));
-    setShowChangeCompany(await permission("profile.changeCompany.*"));
+    // setShowCompany(await permission("company.*"));
+    // setShowChangeCompany(await permission("profile.changeCompany.*"));
     getUserName();
   };
 
@@ -177,21 +177,21 @@ const Navbar: React.FC = () => {
               {showHeader && <li className={styles.liLogo}><Suspense fallback={<Loader />}><Logo /></Suspense></li>}
               <li><Link className={`${styles.links} ${pathname?.startsWith('/analytics') ? styles.active : ''}`} href="/analytics">Analytics</Link></li>
               <li>
-                {showCa && (
+                {showUser && (
                   <Link className={`${styles.links} ${pathname?.startsWith('/user') ? styles.active : ''}`} href="/user">
                     User
                   </Link>
                 )}
               </li>
               <li>
-                {showVoucher && (
+                {showRole && (
                   <Link className={`${styles.links} ${pathname?.startsWith('/role') ? styles.active : ''}`} href="/role">
                     Role
                   </Link>
                 )}
               </li>
               <li>
-                {showContact && (
+                {showGroup && (
                   <Link className={`${styles.links} ${pathname?.startsWith('/group') ? styles.active : ''}`} href="/group">
                     Group
                   </Link>

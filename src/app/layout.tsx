@@ -24,8 +24,8 @@ const TitilliumWeb = local({
 // });
 
 export const metadata: Metadata = {
-  title: "Accounting",
-  description: "",
+  title: "Quick Pass Admin",
+  description: "Efficiently administer your Quick Pass system with our intuitive admin panel.",
 };
 
 
