@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { FormControl, InputLabel, MenuItem, Select, TextField, Button, Tabs, Tab, Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, InputAdornment, IconButton } from '@mui/material';
 import { Delete, Visibility, VisibilityOff } from '@mui/icons-material';
-const GoBack = React.lazy(() => import('../goBack/goBack'));
+const GoBack = React.lazy(() => import('@/components/shared/goBack/goBack'));
 import RoleService from '@/service/role.service';
 import GroupService from '@/service/group.service';
 import { Role } from '@/types/schema/role';
