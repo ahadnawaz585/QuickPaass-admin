@@ -12,7 +12,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import Sidebar from '../sidebar/hamburger';
 import styles from './navbar.module.scss';
-import Loader from '../loader/loader';
+import Loader from '@/components/shared/loader/loader';
 import { People, Groups, Person, Business, HighlightOff } from '@mui/icons-material';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { usePathname, useRouter } from 'next/navigation';

@@ -8,7 +8,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import styles from './roleGroupTable.module.scss';
-import Loader from '../loader/loader';
+import Loader from '@/components/shared/loader/loader';
 import { permission } from '@/auth/access.service';
 import { detailedRole } from '@/types/schema/role';
 import { RoleGroup } from '@/types/schema/group';

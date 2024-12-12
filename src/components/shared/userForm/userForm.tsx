@@ -9,7 +9,7 @@ import { Group } from '@/types/schema/group';
 import { SelectChangeEvent } from '@mui/material/Select';
 import styles from './userForm.module.scss';
 import { UserCreateData } from '@/types/schema/user';
-import Loader from '../loader/loader';
+import Loader from '@/components/shared/loader/loader';
 // import CompanyService from '@/frontend/services/company.service';
 // import { Company } from '@/types/company';
 

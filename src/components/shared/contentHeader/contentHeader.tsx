@@ -1,7 +1,7 @@
 import React, { useState, lazy, Suspense, useEffect } from 'react';
 import { Typography } from '@mui/material';
 import styles from './contentHeader.module.scss';
-import Loader from '../loader/loader';
+import Loader from '@/components/shared/loader/loader';
 import { permission } from '@/auth/access.service';
 
 const SearchComponent = lazy(() => import('../search/search'));
