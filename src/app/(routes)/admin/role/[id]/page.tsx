@@ -1,4 +1,4 @@
-import Loader from '@/components/shared/loader/Loader'
+import Loader from '@/components/shared/loader/loader'
 import React, { Suspense } from 'react'
 const DetailedRoleComponent = React.lazy(()=>import('@/pages/role/detailed/detailed'))
 const page = () => {

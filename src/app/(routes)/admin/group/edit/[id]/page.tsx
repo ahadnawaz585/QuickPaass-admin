@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 const EditGroupComponent = React.lazy(() => import('@/pages/group/edit/edit'));
-import Loader from '@/components/shared/loader/Loader';
+import Loader from '@/components/shared/loader/loader';
 const page = () => {
   return (
     <Suspense fallback={<Loader />}>

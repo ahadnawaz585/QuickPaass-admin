@@ -4,7 +4,7 @@ const GroupRoleFormComponent = React.lazy(() => import('@/components/shared/grou
 import { useRouter } from 'next/navigation';
 import withPermission from '@/components/HOC/withPermission';
 import GroupService from '@/service/group.service';
-import Loader from '@/components/shared/loader/Loader';
+import Loader from '@/components/shared/loader/loader';
 import { Group, createGroup } from '@/types/schema/group';
 import { groupRole } from '@/types/schema/groupRoleForm';
 // import sidebarService from '@/frontend/utilities/sidebar';

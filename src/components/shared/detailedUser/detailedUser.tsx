@@ -4,7 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { UserDetailData } from '@/types/schema/user';
 import InfoIcon from '@mui/icons-material/Info';
 import { Logout } from '@mui/icons-material';
-import Loader from '../loader/Loader';
+import Loader from '../loader/loader';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 const GoBack = React.lazy(() => import('@/components/shared/goBack/goBack'));

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import React, { lazy, Suspense } from "react";
 import local from 'next/font/local';
-import Loader from "@/components/shared/loader/Loader";
+import Loader from "@/components/shared/loader/loader";
 // import Loading from "@/frontend/components/shared/loader/loader";
 import Navbar from "@/components/shared/navbar/navbar";
 import { StyledRoot } from "@/styles/Theme/theme";

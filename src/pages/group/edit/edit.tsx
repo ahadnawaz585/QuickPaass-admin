@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import withPermission from '@/components/HOC/withPermission';
 
-import Loader from '@/components/shared/loader/Loader';
+import Loader from '@/components/shared/loader/loader';
 import GroupRoleFormComponent from '@/components/shared/groupRoleForm/groupRoleForm';
 
 import { createGroup, RoleGroup, UserGroups } from '@/types/schema/group';

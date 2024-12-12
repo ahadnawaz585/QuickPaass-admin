@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import PageEvent from '@mui/material/Pagination';
 import { useRouter } from 'next/navigation';
 
-import Loader from '@/components/shared/loader/Loader';
+import Loader from '@/components/shared/loader/loader';
 const TableComponent = React.lazy(() => import('@/components/shared/table/table'));
 const DynamicSnackbar = React.lazy(() => import('@/components/shared/snackbar/snackbar'));
 const ContentHeaderComponent = React.lazy(() => import('@/components/shared/contentHeader/contentHeader'));

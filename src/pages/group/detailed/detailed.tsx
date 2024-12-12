@@ -3,7 +3,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import withPermission from '@/components/HOC/withPermission';
 import GroupService from '@/service/group.service';
-import Loader from '@/components/shared/loader/Loader';
+import Loader from '@/components/shared/loader/loader';
 import GroupRoleService from '@/service/groupRole.service';
 import UserGroupService from '@/service/userGroup.service';
 import { Group, RoleGroup } from '@/types/schema/group';

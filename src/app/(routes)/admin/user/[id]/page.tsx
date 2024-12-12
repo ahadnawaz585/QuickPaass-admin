@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react'
-import Loader from '@/components/shared/loader/Loader';
+import Loader from '@/components/shared/loader/loader';
 const DetaileUser = React.lazy(() => import('@/pages/user/detailed/detailed'));
 const page = () => {
   return (
