@@ -110,11 +110,11 @@ const Component = () => {
     };
 
     const handleRowSelected = (id: any) => {
-        router.push(`/group/${id}`)
+        router.push(`/admin/group/${id}`)
     };
 
     const handleEditRow = (id: any) => {
-        router.push(`/group/edit/${id}`)
+        router.push(`/admin/group/edit/${id}`)
     };
 
     const handleDeleteRow = (id: any) => {
@@ -127,7 +127,7 @@ const Component = () => {
     };
 
     const handleButtonClicked = () => {
-        router.push('/group/new');
+        router.push('/admin/group/new');
     };
 
     const handlePageSizeChange = (pageSize: number) => {

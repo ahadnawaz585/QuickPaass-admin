@@ -125,7 +125,7 @@ const Navbar: React.FC = () => {
     try {
       await auth.logout();
       console.log("Logout successful");
-      window.location.assign("/login");
+      window.location.assign("/admin/login");
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -151,7 +151,7 @@ const Navbar: React.FC = () => {
   }
 
   const handleProfile = () => {
-    router.push("/profile");
+    router.push("/admin/profile");
   }
 
   const handleSettingsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -175,24 +175,24 @@ const Navbar: React.FC = () => {
             {/* <Suspense fallback={<Loader />}><Logo /></Suspense> */}
             <ul className={`${styles.menu} ${isSidebarOpen ? styles.hideMenu : ''}`}>
               {showHeader && <li className={styles.liLogo}><Suspense fallback={<Loader />}><Logo /></Suspense></li>}
-              <li><Link className={`${styles.links} ${pathname?.startsWith('/analytics') ? styles.active : ''}`} href="/analytics">Analytics</Link></li>
+              <li><Link className={`${styles.links} ${pathname?.startsWith('/admin/analytics') ? styles.active : ''}`} href="/admin/analytics">Analytics</Link></li>
               <li>
                 {showUser && (
-                  <Link className={`${styles.links} ${pathname?.startsWith('/user') ? styles.active : ''}`} href="/user">
+                  <Link className={`${styles.links} ${pathname?.startsWith('/admin/user') ? styles.active : ''}`} href="/admin/user">
                     User
                   </Link>
                 )}
               </li>
               <li>
                 {showRole && (
-                  <Link className={`${styles.links} ${pathname?.startsWith('/role') ? styles.active : ''}`} href="/role">
+                  <Link className={`${styles.links} ${pathname?.startsWith('/admin/role') ? styles.active : ''}`} href="/admin/role">
                     Role
                   </Link>
                 )}
               </li>
               <li>
                 {showGroup && (
-                  <Link className={`${styles.links} ${pathname?.startsWith('/group') ? styles.active : ''}`} href="/group">
+                  <Link className={`${styles.links} ${pathname?.startsWith('/admin/group') ? styles.active : ''}`} href="/admin/group">
                     Group
                   </Link>
                 )}

@@ -54,7 +54,7 @@ const Component = () => {
     const updateGroup = async (data: createGroup) => {
         try {
             await groupService.updateGroup(groupId, data);
-            router.push("/setting/group");
+            router.push("/admin/group");
         } catch (error) {
             console.error("Error updating group", error);
         }
@@ -71,7 +71,7 @@ const Component = () => {
     };
 
     const onDiscard = () => {
-        router.push("/setting/group");
+        router.push("/admin/group");
     };
 
     return (

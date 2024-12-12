@@ -41,12 +41,12 @@ export async function middleware(request: NextRequest) {
   if (requiresAuth(pathname)) {
     if (!isAuthenticated()) {
       redirectTo = pathname;
-      return redirectToLogin(redirectTo);
+      return redirectToLogin(`/admin/${redirectTo}`);
     }
   }
 
   if (isAuthenticated()) {
-    if (pathname === "/login") {
+    if (pathname === "/admin/login") {
       return redirectToHome();
     }
   }

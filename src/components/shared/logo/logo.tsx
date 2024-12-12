@@ -31,7 +31,7 @@ const Logo = () => {
   }, []); // Empty dependency array ensures this runs only once when the component mounts
 
   return (
-    <Link href="/analytics">
+    <Link href="/admin/analytics">
       {logo && logo.endsWith(".svg") ? (
         <img
           src={logo}

@@ -52,7 +52,7 @@ const Component = () => {
         try {
             await auth.logout();
             console.log("Logout successful");
-           window.location.assign('/login');
+           window.location.assign('/admin/login');
         } catch (error) {
             console.error("Error logging out:", error);
         }
@@ -63,7 +63,7 @@ const Component = () => {
         try {
             await auth.logoutOfAllDevices();
             console.log("Logout successful");
-            window.location.assign('/login');
+            window.location.assign('/admin/login');
         } catch (error) {
             console.error("Error logging out:", error);
         }
@@ -110,7 +110,7 @@ const Component = () => {
                 {username && (
                     <>
                         <div className={styles.image}>
-                            <Link href="/analytics"><Image
+                            <Link href="/admin/analytics"><Image
                                 alt="logo"
                                 height="200"
                                 width="200"

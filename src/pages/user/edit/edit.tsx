@@ -41,7 +41,7 @@ const Component: React.FC = () => {
     const updateUser = async (userId: string, data: UserCreateData) => {
         try {
             await userService.updateuser(userId, data);
-            router.push("/user")
+            router.push("/admin/user")
         } catch (error) {
             console.error("error creating user", error);
         }
@@ -52,7 +52,7 @@ const Component: React.FC = () => {
     };
 
     const onDiscard = () => {
-        router.push("/user")
+        router.push("/admin//user")
     };
 
 

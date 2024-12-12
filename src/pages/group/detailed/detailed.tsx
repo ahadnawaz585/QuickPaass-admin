@@ -77,7 +77,7 @@ const Component = () => {
         try {
             const data = await groupService.getGroupById(id);
             setData(data);
-            console.log(data);
+            // console.log(data);
             // const users = data.userRoles
             //     .map((userRole: UserRoles) => userRole.user.id)
             //     .filter((userId: string | undefined) => typeof userId === 'string');
@@ -127,9 +127,9 @@ const Component = () => {
     const handleInfoClick = (tab: string, id: string) => {
 
         if (tab === "Users") {
-            router.push(`/user/${id}`)
+            router.push(`/admin/user/${id}`)
         } else if (tab === "Roles") {
-            router.push(`/role/${id}`)
+            router.push(`/admin/role/${id}`)
         // } else if (tab === "Companies") {
         //     router.push(`/company/${id}`)
         }
@@ -149,13 +149,13 @@ const Component = () => {
 
 
     const handleEdit= async () => {
-        router.push(`/group/edit/${groupId}`)
+        router.push(`/admin/group/edit/${groupId}`)
     }
 
     const handleDeleteClick = async () => {
         try {
             await groupService.deleteGroup(groupId);
-            router.push(`/group/`)
+            router.push(`/admin/group/`)
         } catch (error) {
             console.error(error);
         }

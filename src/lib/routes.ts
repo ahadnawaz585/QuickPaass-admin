@@ -1,9 +1,9 @@
 // @/lib/routes/index.js
 
 const ROUTES = {
-    home: '/analytics',
-    login: '/login',
-    public: ['/login'],
+    home: '/admin/analytics',
+    login: '/admin/login',
+    public: ['/admin/login'],
     // Add more routes as needed
   };
   

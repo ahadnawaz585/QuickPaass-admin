@@ -26,7 +26,7 @@ const Component = () => {
     const createGroup = async (data: createGroup) => {
         try {
             await groupService.createGroup(data);
-            router.push("/group");
+            router.push("/admin/group");
         } catch (error) {
             console.error("error creating group", error);
         }
@@ -43,7 +43,7 @@ const Component = () => {
     };
 
     const onDiscard = () => {
-        router.push("/group")
+        router.push("/admin/group")
     };
 
     return (

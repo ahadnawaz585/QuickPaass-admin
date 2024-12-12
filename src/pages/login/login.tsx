@@ -37,7 +37,7 @@ const LoginForm: React.FC = () => {
     try {
       const response = await auth.login(data);
       if (response) {
-        const redirectPath = searchParams?.get('redirect') || '/analytics';
+        const redirectPath = searchParams?.get('redirect') || '/admin/analytics';
         window.location.replace(redirectPath);
       } else {
         setError('Account Not Verified !! Contact Admin');

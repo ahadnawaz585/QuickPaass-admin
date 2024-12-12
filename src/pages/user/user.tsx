@@ -104,11 +104,11 @@ const Component = () => {
     };
 
     const handleRowSelected = (id: string) => {
-        router.push(`user/${id}`);
+        router.push(`/admin/user/${id}`);
     };
 
     const handleEditRow = (id: string) => {
-        router.push(`user/edit/${id}`);
+        router.push(`/admin/user/edit/${id}`);
     };
 
     const handleDeleteRow = (id: string) => {
@@ -121,7 +121,7 @@ const Component = () => {
     };
 
     const handleButtonClicked = () => {
-        router.push('user/new');
+        router.push('/admin/user/new');
     };
 
     const handlePageSizeChange = (pageSize: number) => {

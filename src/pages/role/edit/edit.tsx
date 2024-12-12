@@ -50,7 +50,7 @@ const Component = () => {
     const updateRole = async (data: createRole) => {
         try {
             await roleService.updateRole(roleId, data);
-            router.push("/role");
+            router.push("/admin/role");
         } catch (error) {
             console.error("Error updating role", error);
         }
@@ -67,7 +67,7 @@ const Component = () => {
     };
 
     const onDiscard = () => {
-        router.push("/role");
+        router.push("/admin/role");
     };
 
     return (

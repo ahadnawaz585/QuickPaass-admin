@@ -167,11 +167,11 @@ const Component = () => {
     const handleInfoClick = (id: string, tab: string,) => {
 
         if (tab === "roles") {
-            router.push(`/role/${id}`)
+            router.push(`/admin/role/${id}`)
         } else if (tab === "groups") {
-            router.push(`/group/${id}`)
-        } else if (tab === "companies") {
-            router.push(`/company/${id}`)
+            router.push(`/admin/group/${id}`)
+        // } else if (tab === "companies") {
+        //     router.push(`/company/${id}`)
         }
     }
 
@@ -196,13 +196,13 @@ const Component = () => {
     }
 
     const handleEdit = async () => {
-        router.push(`/user/edit/${userId}`)
+        router.push(`/admin/user/edit/${userId}`)
     }
 
     const handleDeleteClick = async () => {
         try {
             await userService.deleteuser(userId);
-            router.push(`/user/`)
+            router.push(`/admin/user/`)
         } catch (error) {
             console.error(error);
         }

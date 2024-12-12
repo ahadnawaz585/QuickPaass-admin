@@ -25,7 +25,7 @@ const Component = () => {
     const createRole = async (data: createRole) => {
         try {
             await roleService.createRole(data);
-            router.push("/role");
+            router.push("/admin/role");
         } catch (error) {
             console.error("error creating role", error);
         }
@@ -41,7 +41,7 @@ const Component = () => {
     };
 
     const onDiscard = () => {
-        router.push("/role")
+        router.push("/admin/role")
     };
 
     return (

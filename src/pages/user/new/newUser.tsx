@@ -25,7 +25,7 @@ const Component: React.FC = () => {
     const createUser = async (data: UserCreateData) => {
         try {
             await userService.createuser(data);
-            router.push("/user")
+            router.push("/admin/user")
         } catch (error) {
             console.error("error creating user", error);
         }
@@ -36,7 +36,7 @@ const Component: React.FC = () => {
     };
 
     const onDiscard = () => {
-        router.push("/user")
+        router.push("/admin/user")
     };
 
     return (

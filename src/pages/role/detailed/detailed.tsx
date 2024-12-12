@@ -80,21 +80,21 @@ const Component = () => {
     const handleInfoClick = (tab: string, id: string) => {
 
         if (tab === "Users") {
-            router.push(`/user/${id}`)
+            router.push(`/admin/user/${id}`)
         } else if (tab === "Groups") {
-            router.push(`/group/${id}`)
+            router.push(`/admin/group/${id}`)
         } 
     }
 
 
   const handleEdit= async () => {
-        router.push(`/role/edit/${roleId}`)
+        router.push(`/admin/role/edit/${roleId}`)
     }
 
     const handleDeleteClick = async () => {
         try {
             await roleService.deleteRole(roleId);
-            router.push(`/role/`)
+            router.push(`/admin/role/`)
         } catch (error) {
             console.error(error);
         }
