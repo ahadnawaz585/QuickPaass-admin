@@ -10,6 +10,8 @@ import { AppFeature } from '@/types/schema/appFeature';
 import FeaturePermissionService from '@/service/featurePermission.service';
 import { createFeaturePermission } from '@/types/schema/featurePermission';
 import { permission } from '@/auth/access.service';
+import Authorized from '../authorized/authorized';
+import Loader from '../loader/loader';
 
 interface Props {
     id: string;
@@ -33,6 +35,7 @@ const FeaturePermissionComponent: React.FC<Props> = ({ id, type }) => {
     const [groupPermissions, setGroupPermission] = useState<AppFeature[]>([]);
     const [featurePermissions, setFeaturePermission] = useState<AppFeature[]>([]);
     const [AppFeaturePermissions, setAppFeaturePermission] = useState<AppFeature[]>([]);
+    const [analyticsPermission, setAnalyticsPermissions] = useState<AppFeature[]>([]);
     const [parentType, setParentType] = useState<string>(type);
     const [parentId, setParentId] = useState<string>(id);
     const [updateId, setUpdateId] = useState<string>(id);
@@ -43,6 +46,7 @@ const FeaturePermissionComponent: React.FC<Props> = ({ id, type }) => {
 
     const fetchData = useCallback(async () => {
         await checkAlreadyExistingFeatures(parentType, parentId);
+        setAnalyticsPermissions(await getByParent("analytics.*"));
         setCanView(await permission("featurePermission.*"));
         setCanEdit(await permission("featurePermission.update.*"));
         setLoginPermission(await getByParent("login.*"));
@@ -85,15 +89,19 @@ const FeaturePermissionComponent: React.FC<Props> = ({ id, type }) => {
                 if (features.allowedFeatures.length !== 0) {
                     setUpdate(true);
                     setUpdateId(features.id);
+                    
                 } else {
                     setUpdate(false);
                 }
 
                 setSelectedIds(features.allowedFeatures);
+                setLoading(false);
             } else {
                 setUpdate(false);
+                setLoading(false);
             }
         } catch (error) {
+            setLoading(false);
             console.error("error fetching", error);
         }
     };
@@ -152,8 +160,11 @@ const FeaturePermissionComponent: React.FC<Props> = ({ id, type }) => {
     };
 
     if (!canView) {
-        return <></>;
+        return <Authorized />;
     }
+
+
+
 
     return (
         <div>
@@ -163,7 +174,7 @@ const FeaturePermissionComponent: React.FC<Props> = ({ id, type }) => {
                 {editMode ? 'Disable Edit Mode' : 'Enable Edit Mode'}
             </Button>}
 
-            <div className={styles.container}>
+            {!loading ? (<div className={styles.container}>
                 {!loading && <>
                     <h2 className={styles.heading}>Login Access </h2>
                     <div className={styles.group}>
@@ -172,11 +183,11 @@ const FeaturePermissionComponent: React.FC<Props> = ({ id, type }) => {
                     </div>
                     <h2 className={styles.heading}>Security</h2>
                     <div className={styles.group}>
+                        <CheckboxList heading="Analytics" features={analyticsPermission} selectedIds={selectedIds} onSelectedIdsChange={handleSelectedIdsChange} edit={editMode} />
                         <CheckboxList heading="User" features={userPermissions} selectedIds={selectedIds} onSelectedIdsChange={handleSelectedIdsChange} edit={editMode} />
                         <CheckboxList heading="Role" features={rolePermissions} selectedIds={selectedIds} onSelectedIdsChange={handleSelectedIdsChange} edit={editMode} />
                         <CheckboxList heading="Group" features={groupPermissions} selectedIds={selectedIds} onSelectedIdsChange={handleSelectedIdsChange} edit={editMode} />
                         <CheckboxList heading="Permissions" features={AppFeaturePermissions} selectedIds={selectedIds} onSelectedIdsChange={handleSelectedIdsChange} edit={editMode} />
-                        {/* <CheckboxList heading="Features" features={featurePermissions} selectedIds={selectedIds} onSelectedIdsChange={handleSelectedIdsChange} edit={editMode} /> */}
                     </div>
                     <h2 className={styles.heading}>Application Feature</h2>
                     <div className={styles.group}>
@@ -188,17 +199,16 @@ const FeaturePermissionComponent: React.FC<Props> = ({ id, type }) => {
                         {/* <CheckboxList heading="Ledger" features={ledgerPermissions} selectedIds={selectedIds} onSelectedIdsChange={handleSelectedIdsChange} edit={editMode} /> */}
                     </div>
                 </>}
-            </div>
+            </div>) : (<Loader />)}
             {!loading && editMode && (
                 <>
                     <div className={styles.buttonContainer}>
-                         <Button variant="contained" color="primary" onClick={handleSubmit}   >
+                        <Button variant="contained" color="primary" onClick={handleSubmit}   >
                             Submit
                         </Button>
-                        
+
                         <Button variant="outlined" color="secondary" onClick={handleFormDiscard}>Discard</Button>
                     </div>
-
                 </>
             )}
         </div>

@@ -27,7 +27,7 @@ import UserService from '@/service/user.service';
 
 const Navbar: React.FC = () => {
   const [showHeader, setShowHeader] = useState<boolean>(false);
-  // const [showSetting, setShowSetting] = useState<boolean>(false);
+  const [showAnalytics, setShowAnalytics] = useState<boolean>(false);
   const [showCa, setShowCa] = useState<boolean>(false);
   const [showProfile, setShowProfile] = useState<boolean>(false);
   const [showUser, setShowUser] = useState<boolean>(false);
@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
   // const [showLedger, setShowLedger] = useState<boolean>(false);
   // const [openCompanyDialogue, setOpenCompanyDialogue] = useState(false);
   // const [openChangeCompanyDialogue, setOpenChangeCompanyDialogue] = useState(false);
-//   const companyService: CompanyService = new CompanyService();
+  //   const companyService: CompanyService = new CompanyService();
   const [showSubMenu, setShowSubMenu] = useState<boolean>(false);
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null); // State for settings menu
   const [ShowChangeCompany, setShowChangeCompany] = useState<boolean>(false);
@@ -66,6 +66,7 @@ const Navbar: React.FC = () => {
     // setShowSetting(await permission("setting.*"));
     setShowUser(await permission("user.*"));
     setShowRole(await permission("role.*"));
+    setShowAnalytics(await permission("analytics.*"))
     setShowGroup(await permission("group.*"));
     // setShowCompany(await permission("company.*"));
     // setShowChangeCompany(await permission("profile.changeCompany.*"));
@@ -94,14 +95,14 @@ const Navbar: React.FC = () => {
     setOpenDialogue(!openDialogue);
   }
 
-//   const handleSelectCompany = async (companyId: string) => {
-//     try {
-//       await companyService.changeUserCompany(companyId);
-//       setOpenChangeCompanyDialogue(true);
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   };
+  //   const handleSelectCompany = async (companyId: string) => {
+  //     try {
+  //       await companyService.changeUserCompany(companyId);
+  //       setOpenChangeCompanyDialogue(true);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
 
   const handleCloseChangeCompany = (response: boolean) => {
     if (response) {
@@ -175,7 +176,7 @@ const Navbar: React.FC = () => {
             {/* <Suspense fallback={<Loader />}><Logo /></Suspense> */}
             <ul className={`${styles.menu} ${isSidebarOpen ? styles.hideMenu : ''}`}>
               {showHeader && <li className={styles.liLogo}><Suspense fallback={<Loader />}><Logo /></Suspense></li>}
-              <li><Link className={`${styles.links} ${pathname?.startsWith('/admin/analytics') ? styles.active : ''}`} href="/admin/analytics">Analytics</Link></li>
+              {showAnalytics && <li><Link className={`${styles.links} ${pathname?.startsWith('/admin/analytics') ? styles.active : ''}`} href="/admin/analytics">Analytics</Link></li>}
               <li>
                 {showUser && (
                   <Link className={`${styles.links} ${pathname?.startsWith('/admin/user') ? styles.active : ''}`} href="/admin/user">

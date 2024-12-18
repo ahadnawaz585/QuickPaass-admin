@@ -45,11 +45,13 @@ const Analytics = () => {
   const [totalFeatures, setTotalFeatures] = useState(0);
   const [reportData, setReportData] = useState<ReportData[]>([]);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showAnalyticsGraphs, setShowAnalyticsGraphs] = useState(false);
 
   useEffect(() => {
     const initializeAnalytics = async () => {
       try {
         const hasPermission = await permission("analytics.read.*");
+        setShowAnalyticsGraphs(await permission('analytics.graphs.*'))
         setShowAnalytics(hasPermission);
 
         if (hasPermission) {
@@ -162,7 +164,7 @@ const Analytics = () => {
             </div>
           </div>
         )}
-        <div className={styles.analytics}>
+        {showAnalyticsGraphs && <div className={styles.analytics}>
           <h2 className={styles.heading}>Graphs</h2>
           <div className={styles.graphs}>
             <div className={styles.graph}>
@@ -172,12 +174,12 @@ const Analytics = () => {
               <Pie data={pieChartData} />
             </div>
           </div>
-        </div>
+        </div>}
       </main>
     </div>
   );
 };
 
-const AdminComponent = withPermission(Analytics, "analytics.*");
+const AdminComponent = withPermission(Analytics, "analytics.read.*");
 
 export default AdminComponent;
