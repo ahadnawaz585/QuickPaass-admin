@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { permission } from '@/auth/access.service';
 import Loader from '@/components/shared/loader/loader';
-const Authorized = React.lazy(() => import('@/components/shared/authorized/authorized'));
+const Authorized = React.lazy(() => import('@/modules/rbac/components/authorized/authorized'));
 
 const withPermission = (WrappedComponent: React.FC | React.FC<any>, feature: string) => {
   const ComponentWithPermission = () => {

@@ -1,4 +1,4 @@
-import AccessService from "@/service/rbac.service";
+import AccessService from "@/modules/rbac/services/rbac.service";
 
 const accessService: AccessService = new AccessService();
 

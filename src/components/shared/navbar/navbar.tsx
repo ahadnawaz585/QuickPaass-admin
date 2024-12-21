@@ -23,7 +23,7 @@ import Divider from '@mui/material/Divider';
 // import CompanyService from '@/frontend/services/company.service';
 const DialogueComponent = React.lazy(() => import('@/components/shared/dialogue/dialogue'));
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import UserService from '@/service/user.service';
+import UserService from '@/modules/rbac/services/user.service';
 
 const Navbar: React.FC = () => {
   const [showHeader, setShowHeader] = useState<boolean>(false);

@@ -1,0 +1,39 @@
+@import '../../../../styles/colors/variables';
+
+.group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    /* Increase the gap between CheckboxList components */
+}
+
+
+.container {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+
+    .heading {
+        font-weight: bold;
+        background-color: $global-blue;
+        text-align: center;
+        font-size: 30px;
+        // font-size: large;
+        color: white;
+    }
+    
+}
+
+
+.topHeading {
+    font-weight: bold;
+    font-size: 25px;
+    color: $global-blue;
+    margin: 20px;
+}
+
+.buttonContainer {
+    display: flex;
+
+    gap: 10px;
+}

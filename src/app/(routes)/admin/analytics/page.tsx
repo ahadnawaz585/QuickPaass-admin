@@ -1,6 +1,6 @@
 import Loader from '@/components/shared/loader/loader';
 import React, { Suspense } from 'react'
-const AdminComponent = React.lazy(() => import('@/pages/Analytics/analytics'));
+const AdminComponent = React.lazy(() => import('@/modules/rbac/pages/Analytics/analytics'));
 
 const page = () => {
   return (

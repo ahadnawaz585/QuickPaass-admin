@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react'
-const NewUser = React.lazy(() => import('@/pages/user/new/newUser'));
+const NewUser = React.lazy(() => import('@/modules/rbac/pages/user/new/newUser'));
 import Loader from '@/components/shared/loader/loader';
 const page = () => {
     return (

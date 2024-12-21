@@ -1,6 +1,6 @@
 import Loader from '@/components/shared/loader/loader'
 import React, { Suspense } from 'react'
-const DetailedRoleComponent = React.lazy(()=>import('@/pages/role/detailed/detailed'))
+const DetailedRoleComponent = React.lazy(()=>import('@/modules/rbac/pages/role/detailed/detailed'))
 const page = () => {
     return (
         <Suspense fallback={<Loader/>}>

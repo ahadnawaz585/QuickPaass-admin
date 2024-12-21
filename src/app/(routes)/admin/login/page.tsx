@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 
-const LoginForm = React.lazy(() => import('@/pages/login/login'));
+const LoginForm = React.lazy(() => import('@/modules/rbac/pages/login/login'));
 import Loader from '@/components/shared/loader/loader';
 const page = () => {
   return (
