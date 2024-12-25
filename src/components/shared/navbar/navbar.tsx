@@ -2,48 +2,32 @@
 import Logo from '../logo/logo';
 import Link from 'next/link';
 import React, { useState, Suspense, useEffect } from 'react';
-// import CompanyDialogue from '../shared/companyDialogue/companyDialogue';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
-import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
-import PersonIcon from '@mui/icons-material/Person';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
 import Sidebar from '../sidebar/hamburger';
 import styles from './navbar.module.scss';
 import Loader from '@/components/shared/loader/loader';
-import { People, Groups, Person, Business, HighlightOff } from '@mui/icons-material';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { usePathname, useRouter } from 'next/navigation';
 import AuthService from '@/auth/auth.service';
 import { permission } from '@/auth/access.service';
-import { Settings } from '@mui/icons-material';
-import Divider from '@mui/material/Divider';
-// import CompanyService from '@/frontend/services/company.service';
-const DialogueComponent = React.lazy(() => import('@/components/shared/dialogue/dialogue'));
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import UserService from '@/modules/rbac/services/user.service';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import PeopleIcon from '@mui/icons-material/People';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import WorkIcon from '@mui/icons-material/Work';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 
 const Navbar: React.FC = () => {
   const [showHeader, setShowHeader] = useState<boolean>(false);
   const [showAnalytics, setShowAnalytics] = useState<boolean>(false);
-  const [showCa, setShowCa] = useState<boolean>(false);
   const [showProfile, setShowProfile] = useState<boolean>(false);
   const [showUser, setShowUser] = useState<boolean>(false);
   const [showGroup, setShowGroup] = useState<boolean>(false);
+  const [showAMS, setShowAMS] = useState<boolean>(false);
   const [showRole, setShowRole] = useState<boolean>(false);
-  // const [showCompany, setShowCompany] = useState<boolean>(false);
-  // const [showVoucher, setShowVoucher] = useState<boolean>(false);
-  // const [showContact, setShowContact] = useState<boolean>(false);
-  // const [showLedger, setShowLedger] = useState<boolean>(false);
-  // const [openCompanyDialogue, setOpenCompanyDialogue] = useState(false);
-  // const [openChangeCompanyDialogue, setOpenChangeCompanyDialogue] = useState(false);
-  //   const companyService: CompanyService = new CompanyService();
-  const [showSubMenu, setShowSubMenu] = useState<boolean>(false);
-  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null); // State for settings menu
-  const [ShowChangeCompany, setShowChangeCompany] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>('');
+  const [showAMSSubmenu, setShowAMSSubmenu] = useState(false);
+  const [hoveringLink, setHoveringLink] = useState<string | null>(null);
   const auth: AuthService = new AuthService();
   const userService: UserService = new UserService();
 
@@ -56,27 +40,18 @@ const Navbar: React.FC = () => {
     }
   }, []);
 
-
   const checkPermissions = async () => {
-    // setShowCa(await permission("ca.*"));
     setShowProfile(await permission("profile.*"));
-    // setShowVoucher(await permission("voucher.*"));
-    // setShowContact(await permission("contact.*"));
-    // setShowLedger(await permission("ledger.*"));
-    // setShowSetting(await permission("setting.*"));
+    setShowAMS(await permission('ams.*'));
     setShowUser(await permission("user.*"));
     setShowRole(await permission("role.*"));
     setShowAnalytics(await permission("analytics.*"))
     setShowGroup(await permission("group.*"));
-    // setShowCompany(await permission("company.*"));
-    // setShowChangeCompany(await permission("profile.changeCompany.*"));
     getUserName();
   };
 
   const pathname = usePathname();
   const router = useRouter();
-
-  const [openDialogue, setOpenDialogue] = useState(false);
 
   const getUserName = async () => {
     try {
@@ -87,123 +62,170 @@ const Navbar: React.FC = () => {
     }
   }
 
-  const handleOpenDialogue = () => {
-    setOpenDialogue(true);
-  };
-
-  const toggleDialogue = () => {
-    setOpenDialogue(!openDialogue);
-  }
-
-  //   const handleSelectCompany = async (companyId: string) => {
-  //     try {
-  //       await companyService.changeUserCompany(companyId);
-  //       setOpenChangeCompanyDialogue(true);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
-
-  const handleCloseChangeCompany = (response: boolean) => {
-    if (response) {
-      window.location.reload();
-    } else {
-      window.location.reload();
-    }
-  }
-
-  const handleCloseDialogue = (response: boolean) => {
-    setOpenDialogue(false);
-    if (response) {
-      logout();
-    } else {
-      setOpenDialogue(false);
-    }
-  };
-
-  const logout = async () => {
-    console.log("logging out..");
-    try {
-      await auth.logout();
-      console.log("Logout successful");
-      window.location.assign("/admin/login");
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  }
-
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleAccountMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleAccountMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleAdminClick = () => {
-    setShowSubMenu(!showSubMenu);
-  }
-
   const handleProfile = () => {
     router.push("/admin/profile");
   }
 
-  const handleSettingsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setSettingsAnchorEl(event.currentTarget);
-  };
-
-  const handleSettingsMenuClose = () => {
-    setSettingsAnchorEl(null);
+  const getLinkContent = (link: string) => {
+    switch (link) {
+      case 'analytics':
+        return { title: 'Analytics Dashboard', description: '' };
+      case 'user':
+        return { title: 'User Management', description: '' };
+      case 'role':
+        return { title: 'Role Management', description: '' };
+      case 'group':
+        return { title: 'Group Management', description: '' };
+      case 'ams':
+        return { title: 'AMS Overview', description: 'Access the Asset Management System' };
+      case 'employee':
+        return { title: 'Employee Management', description: 'Manage employee information and records' };
+      case 'leave':
+        return { title: 'Leaves Management', description: 'Manage leaves information and records' };
+      case 'attendance':
+        return { title: 'Attendance Management', description: 'Manage attendance information and records' };
+      default:
+        return { title: '', description: '' };
+    }
   };
 
   return (
     <>
       {showHeader && (
         <nav className={styles.navbar}>
-          <div className={styles.container}>
-            {/* <div> */}
-            {/* <Suspense fallback={<Loader />}><Logo /></Suspense> */}
 
-            {/* </div> */}
+          <div className={styles.container}>
             {showHeader && <li className={styles.logo}><Suspense fallback={<Loader />}><Logo /></Suspense></li>}
-            {/* <Suspense fallback={<Loader />}><Logo /></Suspense> */}
             <ul className={`${styles.menu} ${isSidebarOpen ? styles.hideMenu : ''}`}>
               {showHeader && <li className={styles.liLogo}><Suspense fallback={<Loader />}><Logo /></Suspense></li>}
-              {showAnalytics && <li><Link className={`${styles.links} ${pathname?.startsWith('/admin/analytics') ? styles.active : ''}`} href="/admin/analytics">Analytics</Link></li>}
-              <li>
-                {showUser && (
+              {showAnalytics && (
+                <li
+                  onMouseEnter={() => setHoveringLink('analytics')}
+                  onMouseLeave={() => setHoveringLink(null)}
+                >
+                  <Link className={`${styles.links} ${pathname?.startsWith('/admin/analytics') ? styles.active : ''}`} href="/admin/analytics">
+                    <BarChartIcon />
+                    <span>Analytics</span>
+                  </Link>
+                </li>
+              )}
+              {showUser && (
+                <li
+                  onMouseEnter={() => setHoveringLink('user')}
+                  onMouseLeave={() => setHoveringLink(null)}
+                >
                   <Link className={`${styles.links} ${pathname?.startsWith('/admin/user') ? styles.active : ''}`} href="/admin/user">
-                    User
+                    <PeopleIcon />
+                    <span>User</span>
                   </Link>
-                )}
-              </li>
-              <li>
-                {showRole && (
+                </li>
+              )}
+              {showRole && (
+                <li
+                  onMouseEnter={() => setHoveringLink('role')}
+                  onMouseLeave={() => setHoveringLink(null)}
+                >
                   <Link className={`${styles.links} ${pathname?.startsWith('/admin/role') ? styles.active : ''}`} href="/admin/role">
-                    Role
+                    <PersonAddIcon />
+                    <span>Role</span>
                   </Link>
-                )}
-              </li>
-              <li>
-                {showGroup && (
+                </li>
+              )}
+              {showGroup && (
+                <li
+                  onMouseEnter={() => setHoveringLink('group')}
+                  onMouseLeave={() => setHoveringLink(null)}
+                >
                   <Link className={`${styles.links} ${pathname?.startsWith('/admin/group') ? styles.active : ''}`} href="/admin/group">
-                    Group
+                    <PeopleIcon />
+                    <span>Group</span>
                   </Link>
-                )}
-              </li>
+                </li>
+              )}
+              {showAMS && (
+                <li
+                  onMouseEnter={() => { setShowAMSSubmenu(true); setHoveringLink('ams'); }}
+                  onMouseLeave={() => { setShowAMSSubmenu(false); setHoveringLink(null); }}
+                >
+                  <div className={styles.amsContainer}>
+                    <Link
+                      className={`${styles.links} ${pathname?.startsWith('/admin/ams') ? styles.active : ''}`}
+                      href="/admin/ams"
+                    >
+                      <WorkIcon />
+                      <span>AMS</span>
+                    </Link>
+                    {showAMSSubmenu && (
+                      <div className={styles.amsSubmenu}>
+                        <div className={styles.amsCompleteContainer}>
+                          <div>
+                            <Link
+                              className={`${styles.links} ${pathname?.startsWith('/admin/ams/employee') ? styles.active : ''}`}
+                              href="/admin/ams/employee"
+                              onMouseEnter={() => setHoveringLink('employee')}
+                            >
+                              <span>Employee</span>
+                              <span
+                                className={styles.addIcon}
+                                onClick={() => router.push('/admin/ams/employee/new')}
+                              >
+                                <AddCircleIcon onClick={() => router.push('/admin/ams/employee/new')} />
+                              </span>
+                            </Link>
+
+                            <Link
+                              className={`${styles.links} ${pathname?.startsWith('/admin/ams/attendance') ? styles.active : ''}`}
+                              href="/admin/ams/attendance"
+                              onMouseEnter={() => setHoveringLink('attendance')}
+                            >
+                              <span>Attendance</span>
+                              <span
+                                className={styles.addIcon}
+                                onClick={() => router.push('/admin/ams/attendance/new')}
+                              >
+                                <AddCircleIcon />
+                              </span>
+                            </Link>
+
+                            <Link
+                              className={`${styles.links} ${pathname?.startsWith('/admin/ams/leave') ? styles.active : ''}`}
+                              href="/admin/ams/leave"
+                              onMouseEnter={() => setHoveringLink('leave')}
+                            >
+                              <span>Leave</span>
+                              <span
+                                className={styles.addIcon}
+                                onClick={() => router.push('/admin/ams/leave/new')}
+                              >
+                                <AddCircleIcon />
+                              </span>
+                            </Link>
+                          </div>
+                          <div className={styles.leftContainer}>
+                            {hoveringLink && (
+                              <div className={styles.hoverContent}>
+                                <h3>{getLinkContent(hoveringLink).title}</h3>
+                                <p>{getLinkContent(hoveringLink).description}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                    )}
+                  </div>
+                </li>
+              )}
+
             </ul>
-            {/* Navbar Menu */}
 
-            {/* User Icons */}
             <div className={styles.user}>
-
               <span
                 className={styles.account_circle}
                 onClick={handleProfile}
@@ -211,67 +233,14 @@ const Navbar: React.FC = () => {
                 aria-haspopup="true"
               >
                 <AccountCircleIcon />
-                <span >{userName}</span>
+                <span>{userName}</span>
               </span>
               <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-              {/* <Suspense fallback={<Loader />}> 
-                {openDialogue && <DialogueComponent
-                  heading="Confirmation"
-                  question="Are you sure you want to proceed?"
-                  onClose={handleCloseDialogue}
-                />}
-              </Suspense>
-              <Suspense fallback={<Loader />}> 
-                {openChangeCompanyDialogue && <DialogueComponent
-                  heading="Alert !!"
-                  question="Logging into a new company account. If you have signed in from another tab or window, please reload them to refresh your session."
-                  onClose={handleCloseChangeCompany}
-                  showYesOrNo={false}
-                />}
-              </Suspense>
-              {openCompanyDialogue && (
-                <Suspense fallback={<div>Loading...</div>}>
-                  <CompanyDialogue
-                    open={openCompanyDialogue}
-                    onSelectCompany={handleSelectCompany}
-                    onClose={() => setOpenCompanyDialogue(false)}
-                  />
-                </Suspense>
-              )}
-              <Menu
-                id="account-menu"
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleAccountMenuClose}
-              >
-                {[
-                  showUser && <MenuItem key="profile" onClick={() => { handleAccountMenuClose(); handleProfile(); }}><PersonIcon fontSize='small' />Profile</MenuItem>,
-                  (showSetting || showGroup || showCompany || showRole || showUser) && (
-                    <div key="admin">
-                      <MenuItem onClick={handleAdminClick}>
-                        {showSubMenu ? <KeyboardArrowDownIcon /> : <KeyboardArrowRightIcon />}
-                        Admin
-                      </MenuItem>
-                      {showSubMenu && [
-                        <Divider key="divider1" />,
-                        showSetting && <MenuItem key="setting" onClick={() => { handleAccountMenuClose(); router.push("/setting"); }}><Settings fontSize='small' />Setting</MenuItem>,
-                        showUser && <MenuItem key="user" onClick={() => { handleAccountMenuClose(); router.push("/setting/user"); }}><Person fontSize='small' />Users</MenuItem>,
-                        showRole && <MenuItem key="role" onClick={() => { handleAccountMenuClose(); router.push("/setting/role"); }}><People fontSize='small' />Roles</MenuItem>,
-                        showGroup && <MenuItem key="group" onClick={() => { handleAccountMenuClose(); router.push("/setting/group"); }}><Groups />Groups</MenuItem>,
-                        showCompany && <MenuItem key="company" onClick={() => { handleAccountMenuClose(); router.push("/setting/company"); }}><Business />Companies</MenuItem>,
-                        <Divider key="divider2" />
-                      ]}
-                    </div>
-                  ),
-                  ShowChangeCompany && <MenuItem key="changeCompany" onClick={() => { setOpenCompanyDialogue(true); handleAccountMenuClose(); }}><ChangeCircleIcon fontSize='small' />Change Company</MenuItem>,
-                  <MenuItem key="logout" onClick={() => { toggleDialogue(); handleAccountMenuClose(); }}><LogoutIcon fontSize='small' />Logout</MenuItem>
-                ]}
-              </Menu> */}
-
-
               <span className={styles.hamburgerIcon} onClick={toggleSidebar}><MenuIcon /></span>
             </div>
+
           </div>
+
         </nav>
       )}
     </>

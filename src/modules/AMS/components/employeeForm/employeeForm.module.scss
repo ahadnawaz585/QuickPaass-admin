@@ -1,0 +1,95 @@
+.formContainer {
+  padding: 2rem;
+  background-color: #f5f5f5;
+  min-height: 90vh;
+}
+
+.formPaper {
+  padding: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #ffffff;
+}
+
+.formTitle {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.sectionTitle {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.imageUploadSection {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.imageUploadContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 300px;
+}
+
+.uploadButton {
+  width: 100%;
+  padding: 1rem;
+  border: 2px dashed #1976d2;
+  &:hover {
+    border-color: #1565c0;
+    background-color: rgba(25, 118, 210, 0.04);
+  }
+}
+
+.imagePreviewContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.imagePreview {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.submitButton {
+  min-width: 150px;
+}
+
+.discardButton {
+  min-width: 150px;
+  background-color: #f5f5f5;
+  &:hover {
+    background-color: #e0e0e0;
+  }
+}

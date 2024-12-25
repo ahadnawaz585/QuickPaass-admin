@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { FC, useState, useEffect } from 'react';
 import styles from './hamburger.module.scss';
 import Drawer from '@mui/material/Drawer';
@@ -7,34 +7,33 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import CloseIcon from '@mui/icons-material/Close';
 import { permission } from '@/auth/access.service';
-
+import WorkIcon from '@mui/icons-material/Work';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import PeopleIcon from '@mui/icons-material/People';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'; // Import Arrow Icon
 
 const Sidebar: FC<HamburgerProps> = ({ isSidebarOpen, toggleSidebar }) => {
     const pathname = usePathname();
     const [showAnalytics, setShowAnalytics] = useState<boolean>(false);
-    // const [showCa, setShowCa] = useState<boolean>(false);
-    // const [showVoucher, setShowVoucher] = useState<boolean>(false);
-    // const [showContact, setShowContact] = useState<boolean>(false);
-    // const [showLedger, setShowLedger] = useState<boolean>(false);
     const [showUser, setShowUser] = useState<boolean>(false);
     const [showGroup, setShowGroup] = useState<boolean>(false);
     const [showRole, setShowRole] = useState<boolean>(false);
+    const [showAMS, setShowAMS] = useState<boolean>(false);
+    const [showAMSSubmenu, setShowAMSSubmenu] = useState(false);
 
     useEffect(() => {
-
         const checkPermissions = async () => {
-            // setShowCa(await permission("ca.*"));
-            // setShowVoucher(await permission("voucher.*"));
-            // setShowContact(await permission("contact.*"));
-            // setShowLedger(await permission("ledger.*"));
             setShowAnalytics(await permission("analytics.*"));
             setShowUser(await permission("user.*"));
             setShowRole(await permission("role.*"));
             setShowGroup(await permission("group.*"));
+            setShowAMS(await permission('ams.*'));
         };
-
         checkPermissions();
     }, []);
+
     return (
         <Drawer
             variant="persistent"
@@ -47,47 +46,82 @@ const Sidebar: FC<HamburgerProps> = ({ isSidebarOpen, toggleSidebar }) => {
                     <CloseIcon />
                 </IconButton>
             </div>
+
             <ul className={`${styles.menu} ${isSidebarOpen ? styles.hideMenu : ''}`}>
-                {showAnalytics && <li className={styles.listItem}><Link className={`${styles.links} ${pathname?.startsWith('/admin/analytics') ? styles.active : ''}`} href="/admin/analytics">Analytics</Link></li>}
-                <li className={styles.listItem}>
-                    {/* {showCa && (
-                        <Link className={`${styles.links} ${pathname?.startsWith('/ca') ? styles.active : ''}`} href="/ca">
-                            Chart of Accounts
+                {showAnalytics && (
+                    <li className={styles.listItem}>
+                        <Link className={`${styles.links} ${pathname?.startsWith('/admin/analytics') ? styles.active : ''}`} href="/admin/analytics">
+                            <BarChartIcon />
+                            Analytics
                         </Link>
-                    )} */}
-                    {showUser && (
+                    </li>
+                )}
+                {showUser && (
+                    <li className={styles.listItem}>
                         <Link className={`${styles.links} ${pathname?.startsWith('/admin/user') ? styles.active : ''}`} href="/admin/user">
+                            <PeopleIcon />
                             User
                         </Link>
-                    )}
-                </li>
-                <li className={styles.listItem}>
-                    {showRole && (
+                    </li>
+                )}
+                {showRole && (
+                    <li className={styles.listItem}>
                         <Link className={`${styles.links} ${pathname?.startsWith('/admin/role') ? styles.active : ''}`} href="/admin/role">
+                            <PersonAddIcon />
                             Role
                         </Link>
-                    )}
-                </li>
-                <li className={styles.listItem}>
-                    {showGroup && (
+                    </li>
+                )}
+                {showGroup && (
+                    <li className={styles.listItem}>
                         <Link className={`${styles.links} ${pathname?.startsWith('/admin/group') ? styles.active : ''}`} href="/admin/group">
+                            <PeopleIcon />
                             Group
                         </Link>
-                    )}
-                </li>
-                {/* <li className={styles.listItem}>
-                    {showLedger && (
-                        <Link className={`${styles.links} ${pathname?.startsWith('/ledger') ? styles.active : ''}`} href="/ledger">
-                            Ledger
-                        </Link>
-                    )}
-                </li> */}
-
+                    </li>
+                )}
+                {showAMS && (
+                    <li
+                        onClick={() => setShowAMSSubmenu(!showAMSSubmenu)} // Toggle the AMS submenu visibility on click
+                        className={styles.listItem}
+                    >
+                        <div className={styles.amsContainer}>
+                            <Link className={`${styles.links} ${pathname?.startsWith('/admin/ams') ? styles.active : ''}`} href="/admin/ams">
+                                <WorkIcon />
+                                AMS
+                            </Link>
+                            <ArrowDropDownIcon className={styles.addIcon} /> {/* Arrow Icon */}
+                        </div>
+                        {showAMSSubmenu && (
+                            <div className={styles.amsSubmenu}>
+                                <Link
+                                    className={`${styles.links} ${pathname?.startsWith('/admin/ams/employee') ? styles.active : ''}`}
+                                    href="/admin/ams/employee"
+                                >
+                                    Employee
+                                    <AddCircleIcon className={styles.addIcon} />
+                                </Link>
+                                <Link
+                                    className={`${styles.links} ${pathname?.startsWith('/admin/ams/attendance') ? styles.active : ''}`}
+                                    href="/admin/ams/attendance"
+                                >
+                                    Attendance
+                                    <AddCircleIcon className={styles.addIcon} />
+                                </Link>
+                                <Link
+                                    className={`${styles.links} ${pathname?.startsWith('/admin/ams/leave') ? styles.active : ''}`}
+                                    href="/admin/ams/leave"
+                                >
+                                    Leave
+                                    <AddCircleIcon className={styles.addIcon} />
+                                </Link>
+                            </div>
+                        )}
+                    </li>
+                )}
             </ul>
         </Drawer>
     );
-    // styles.listItem
-    // <li className={styles.listItem}><Link className={`${styles.links} ${pathname === '/analytics' ? styles.active : ''}`} href="/analytics">Analytics</Link></li>
 };
 
 export default Sidebar;

@@ -17,6 +17,18 @@ class UserService extends BaseService {
       });
   }
 
+  getNonAssociatedUsers() {
+    return axiosInstance
+      .get<User[]>(`${this.baseUrl}/getNonAssociatedUsers`)
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error fetching all users", error);
+        throw error;
+      });
+  }
+
+  
+
   getUsers(page: number, pageSize: number): Promise<paginatedData> {
     return axiosInstance
       .post<paginatedData>(`${this.baseUrl}/get`, {

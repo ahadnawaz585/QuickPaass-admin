@@ -1,0 +1,15 @@
+.action-buttons {
+    @apply flex gap-2;
+  
+    &__btn {
+      @apply px-4 py-2 rounded-md text-sm font-medium transition-colors;
+  
+      &--edit {
+        @apply bg-blue-500 text-white hover:bg-blue-600;
+      }
+  
+      &--delete {
+        @apply bg-red-500 text-white hover:bg-red-600;
+      }
+    }
+  }

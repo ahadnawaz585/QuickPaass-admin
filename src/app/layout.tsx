@@ -6,6 +6,7 @@ import Loader from "@/components/shared/loader/loader";
 import Navbar from "@/components/shared/navbar/navbar";
 import { StyledRoot } from "@/styles/Theme/theme";
 
+
 // import AuthService from "@/authentication/auth.service";
 import "./globals.scss";
 
@@ -43,13 +44,15 @@ export default function RootLayout(
     <html lang="en">
       <body className={`${TitilliumWeb.className}`}>
         <div >
-          { <Navbar />}
-        <div className="host">
-          {/* <p>{activePath}</p> */}
-          <div >
-            <div className="main-content"><Suspense fallback={<Loader />}> <StyledRoot>{children}</StyledRoot></Suspense></div>
+          {<Navbar />}
+          <div className="host">
+            {/* <p>{activePath}</p> */}
+            <div >
+           
+                <div className="main-content"><Suspense fallback={<Loader />}> <StyledRoot>{children}</StyledRoot></Suspense></div>
+
+            </div>
           </div>
-        </div>
         </div>
       </body>
     </html >
