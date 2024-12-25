@@ -1,9 +1,10 @@
 import React, { FC, useState, lazy, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, IconButton } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, IconButton, Modal, Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Clear';
 import { permission } from '@/auth/access.service';
 import { MoreVert, Edit, Delete } from '@mui/icons-material';
 import styles from "./table.module.scss";
+import { formatDate } from '@/utils/date';
 
 const PaginatorComponent = lazy(() => import('../paginator/paginator'));
 const DialogueComponent = lazy(() => import('../dialogue/dialogue'));
@@ -36,8 +37,9 @@ const TableComponent: FC<TableComponentProps> = ({
   const [editRowIndex, setEditRowIndex] = useState<number | null>(null);
   const [deleteRowIndex, setDeleteRowIndex] = useState<number | null>(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState<{ [key: number]: HTMLElement | null }>({});
-
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const rightAlignedColumns = ['balance', 'debit', 'credit']; // Define right-aligned columns
+  const [imageToShow, setImageToShow] = useState<string | null>(null);
 
   useEffect(() => {
     checkPermissions();
@@ -57,6 +59,16 @@ const TableComponent: FC<TableComponentProps> = ({
 
   const handleCellClick = (element: any) => {
     onRowSelected(element.id);
+  };
+
+  const handleImageClick = (src: string) => {
+    setImageToShow(src);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setImageToShow(null);
+    setIsModalOpen(false);
   };
 
   const handleEditClick = (rowIndex: number, event: React.MouseEvent<HTMLLIElement>) => {
@@ -103,12 +115,12 @@ const TableComponent: FC<TableComponentProps> = ({
               {tableColumns.map((column, index) => (
                 // Conditionally render balance-related columns based on permission
                 (showBalanceColumns || !['debit', 'credit', 'balance'].includes(column)) && (
-                  <TableCell key={index} style={{ fontWeight: 'bold', color: '#2969c2', fontSize: '16px' ,textAlign: rightAlignedColumns.includes(column) ? 'right' : 'left'  }}>
+                  <TableCell key={index} style={{ fontWeight: 'bold', color: '#2969c2', fontSize: '16px', textAlign: rightAlignedColumns.includes(column) ? 'right' : 'left' }}>
                     {columnMappings[column] || column}
                   </TableCell>
                 )
               ))}
-              {showMenu && <TableCell style={{paddingTop:0,paddingBottom:0 }}></TableCell>}
+              {showMenu && <TableCell style={{ paddingTop: 0, paddingBottom: 0 }}></TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -123,38 +135,57 @@ const TableComponent: FC<TableComponentProps> = ({
                 {tableColumns.map((column, colIndex) => (
                   // Conditionally render balance-related cells based on permission
                   (showBalanceColumns || !['debit', 'credit', 'balance'].includes(column)) && (
-                    <TableCell 
-                      key={colIndex} 
-                      style={{ 
+                    <TableCell
+                      key={colIndex}
+                      style={{
                         color: column === 'balance' && row[column].startsWith("-") ? 'red' : 'inherit',
                         textAlign: rightAlignedColumns.includes(column) ? 'right' : 'left' // Apply right alignment if the column is in the array
                       }}
                     >
-                    {column === 'accountName' ? (
-                      <span className={row.isLedgerAccount ? '' : styles.boldText}>
-                        {row[column]}
-                      </span>
-                    ) : isBoolean(row[column]) ? (
-                      <span className={row[column] ? 'green-icon' : 'red-icon'}>  
+                      {column === 'image' && row[column] ? (
+                        <img
+                          src={`${row[column]}`}
+                          alt="Image"
+                          onClick={(event) => {
+                            event.stopPropagation(); // Prevents the parent cell's click handler
+                            handleImageClick(row[column]); // Call your image click handler
+                          }}
+                          style={{
+                            width: '30px',
+                            height: '30px',
+                            objectFit: 'cover',
+                            borderRadius: '50%' // Makes the image circular
+                          }}
+                        />
+                      ) : column.toLowerCase().includes('date') && row[column] ? ( // Check for date columns
+                        formatDate(row[column].toString())
+                      ) :
+                      isBoolean(row[column]) ? (
+                      <span className={row[column] ? 'green-icon' : 'red-icon'}>
                         {row[column] ? (
                           <span style={{ color: 'green' }}>✔</span>
                         ) : (
                           <span style={{ color: 'red' }}>✖</span>
                         )}
                       </span>
-                    ) : row[column] == null ? (
+                      ) : row[column] == null ? (
                       <p>-</p>
-                    ) : isNumber(row[column]) ? (
+                      ) : isNumber(row[column]) ? (
                       new Intl.NumberFormat().format(row[column])
-                    ) : (
+                      ) : column === 'accountName' ? (
+                      <span className={row.isLedgerAccount ? '' : styles.boldText}>
+                        {row[column]}
+                      </span>
+                      ) : (
                       row[column]
-                    )}
-                  </TableCell>
-                  
+                      )}
+                    </TableCell>
+
+
                   )
                 ))}
                 {showMenu && (
-                  <TableCell style={{paddingTop:0,paddingBottom:0 ,textAlign:'right'}}>
+                  <TableCell style={{ paddingTop: 0, paddingBottom: 0, textAlign: 'right' }}>
                     {(editAllowance && deleteAllowance) && <IconButton onClick={(event) => handleMenuClick(event, rowIndex)} aria-label="more" aria-controls="menu" aria-haspopup="true">
                       <MoreVert fontSize='small' />
                     </IconButton>}
@@ -197,6 +228,36 @@ const TableComponent: FC<TableComponentProps> = ({
         </Table>
         {tableData.length === 0 && <div className={styles.message}>{noDataMessage}</div>}
       </TableContainer>
+      {isModalOpen && (
+        <Modal open={isModalOpen} onClose={handleCloseModal}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 2,
+              outline: 'none',
+            }}
+          >
+            <IconButton
+              onClick={handleCloseModal}
+              style={{ position: 'absolute', top: 10, right: 10 }}
+            >
+              <CloseIcon color='warning' />
+            </IconButton>
+            {imageToShow && (
+              <img
+                src={imageToShow}
+                alt="Modal Content"
+                style={{ maxWidth: '100%', maxHeight: '90vh', display: 'block', margin: '0 auto' }}
+              />
+            )}
+          </Box>
+        </Modal>
+      )}
       {paginator && tableData.length !== 0 && (
         <PaginatorComponent
           onPageSizeChange={handlePageSizeChange}

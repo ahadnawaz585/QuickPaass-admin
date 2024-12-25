@@ -16,6 +16,7 @@ export interface User {
   username: string;
   password: string;
   rememberMe?: boolean;
+  employeeId?:string;
   // defaultCompanyId?: string;
   createdAt?: Date | null | undefined;
   updatedAt?: Date | null | undefined;

@@ -56,6 +56,8 @@ class EmployeeService extends BaseService {
       });
   }
 
+  
+
   updateEmployee(id: string, employeeData: Employee) {
     return axiosInstance
       .put<void>(`${this.baseUrl}/update`, { id, data: employeeData })
@@ -83,7 +85,7 @@ class EmployeeService extends BaseService {
       });
   }
 
-  searchEmployees(searchTerm: string, page: number, pageSize: number) {
+  searchEmployees(searchTerm: string[], page: number, pageSize: number) {
     return axiosInstance
       .post<paginatedData>(`${this.baseUrl}/search`, {
         searchTerm,
@@ -107,12 +109,46 @@ class EmployeeService extends BaseService {
       });
   }
 
+
   getFrequentEmployees() {
     return axiosInstance
       .get<Employee[]>(`${this.baseUrl}/getFrequent`)
       .then((response) => response.data)
       .catch((error) => {
         console.error("Error fetching frequent employees", error);
+        throw error;
+      });
+  }
+
+  // New methods for file management
+  getFiles(employeeId: string) {
+    return axiosInstance
+      .post<{ fileName: string; filePath: string }[]>(`${this.baseUrl}/files`, { employeeId })
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error fetching files for employee", error);
+        throw error;
+      });
+  }
+
+  deleteFiles(employeeId: string, fileName: string) {
+    return axiosInstance
+      .post<void>(`${this.baseUrl}/filesDel`, { employeeId, fileName })
+      .catch((error) => {
+        console.error("Error deleting file for employee", error);
+        throw error;
+      });
+  }
+
+  uploadFile(formData: FormData) {
+    return axiosInstance
+      .post<void>(`${this.baseUrl}/updateFile`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .catch((error) => {
+        console.error("Error uploading file for employee", error);
         throw error;
       });
   }
