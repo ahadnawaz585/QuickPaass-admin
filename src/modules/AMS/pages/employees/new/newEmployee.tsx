@@ -24,7 +24,7 @@ const Component = () => {
 
             formData.code = generateEmployeeCode(formData);
             
-            console.log(formData);
+            // console.log(formData);
             await service.createEmployee(formData);
             router.push('/admin/ams/employee')
         } catch (error) {

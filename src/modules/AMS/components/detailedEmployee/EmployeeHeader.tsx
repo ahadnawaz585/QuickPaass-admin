@@ -10,11 +10,12 @@ import './styles/EmployeeHeader.scss';
 
 interface EmployeeHeaderProps {
   employee: Employee;
+  onPrint: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDelete }) => {
+const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDelete ,onPrint}) => {
   const [showImageModal, setShowImageModal] = useState(false);
   const age = calculateAge(employee.dob.toString());
   const workDuration = calculateWorkDuration(employee.joiningDate.toString());
@@ -24,7 +25,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDel
       <div className="employee-header">
         <div className="employee-header__top">
           <h1 className="text-lg text-gray-600">Employee Details</h1>
-          <ActionButtons onEdit={onEdit} onDelete={onDelete} />
+          <ActionButtons onEdit={onEdit} onDelete={onDelete} onPrint={onPrint} />
         </div>
 
         <div className="employee-header__profile">
@@ -46,7 +47,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDel
               <p>{employee.designation}</p>
               <p>{employee.department}</p>
               <div className="employee-header__qr">
-                <Barcode value={employee.code} width={1} height={30} />
+                {/* <Barcode value={employee.code} width={1} height={30} /> */}
                 <QRCodeSVG value={employee.code} size={80} />
               </div>
 

@@ -56,8 +56,6 @@ class EmployeeService extends BaseService {
       });
   }
 
-  
-
   updateEmployee(id: string, employeeData: Employee) {
     return axiosInstance
       .put<void>(`${this.baseUrl}/update`, { id, data: employeeData })
@@ -109,7 +107,6 @@ class EmployeeService extends BaseService {
       });
   }
 
-
   getFrequentEmployees() {
     return axiosInstance
       .get<Employee[]>(`${this.baseUrl}/getFrequent`)
@@ -123,7 +120,9 @@ class EmployeeService extends BaseService {
   // New methods for file management
   getFiles(employeeId: string) {
     return axiosInstance
-      .post<{ fileName: string; filePath: string }[]>(`${this.baseUrl}/files`, { employeeId })
+      .post<{ fileName: string; filePath: string }[]>(`${this.baseUrl}/files`, {
+        employeeId,
+      })
       .then((response) => response.data)
       .catch((error) => {
         console.error("Error fetching files for employee", error);
@@ -149,6 +148,16 @@ class EmployeeService extends BaseService {
       })
       .catch((error) => {
         console.error("Error uploading file for employee", error);
+        throw error;
+      });
+  }
+
+  generatePDF(id: string): Promise<Blob> {
+    return axiosInstance
+      .post(`${this.baseUrl}/getCard`, { id }, { responseType: "blob" })
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error generating PDF:", error);
         throw error;
       });
   }
