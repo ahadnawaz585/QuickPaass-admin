@@ -5,6 +5,10 @@
       @apply px-4 py-2 rounded-md text-sm font-medium transition-colors;
   
       &--edit {
+        @apply bg-green-500 text-white hover:bg-green-600;
+      }
+       
+      &--print{
         @apply bg-blue-500 text-white hover:bg-blue-600;
       }
   

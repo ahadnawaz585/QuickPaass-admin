@@ -20,7 +20,7 @@ const Component = () => {
     const router = useRouter();
     const [snackbarText, setSnackbarText] = useState<string>("");
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const [dialogAction, setDialogAction] = useState<"edit" | "delete" | null>(null);
+    const [dialogAction, setDialogAction] = useState<"edit" | "delete" | "print" | null>(null);
 
     useEffect(() => {
         if (employeeId) {
@@ -47,6 +47,11 @@ const Component = () => {
         setDialogOpen(true);
     };
 
+    const handlePrint = () => {
+        setDialogAction("print");
+        setDialogOpen(true);
+    }
+
     const confirmAction = async (confirmed: boolean) => {
         setDialogOpen(false);
 
@@ -57,6 +62,16 @@ const Component = () => {
 
         if (dialogAction === "edit") {
             router.push(`/admin/ams/employee/edit/${employeeId}`);
+        }
+
+        if (dialogAction === "print") {
+            try {
+                const voucherBlob: Blob = await service.generatePDF(employeeId);
+                const pdfUrl = URL.createObjectURL(voucherBlob);
+                window.open(pdfUrl, '_blank');
+            } catch (error) {
+                console.error("Error generating Voucher:", error);
+            }
         }
 
         if (dialogAction === "delete") {
@@ -74,7 +89,7 @@ const Component = () => {
         <>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 {employeeData ? (
-                    <DetailedEmployeeComponent onDelete={handleDelete} onEdit={handleEdit} employee={employeeData} />
+                    <DetailedEmployeeComponent onPrint={handlePrint} onDelete={handleDelete} onEdit={handleEdit} employee={employeeData} />
                 ) : (
                     <Loader />
                 )}
@@ -84,11 +99,15 @@ const Component = () => {
 
             {dialogOpen && (
                 <DialogueComponent
-                    heading={dialogAction === "edit" ? "Confirm Edit" : "Confirm Delete"}
+                    heading={
+                        dialogAction === "edit" ? "Confirm Edit" : dialogAction === "print" ? "Confirm Print" : "Confirm Delete"
+                    }
                     question={
                         dialogAction === "edit"
                             ? "Are you sure you want to edit this employee?"
-                            : "Are you sure you want to delete this employee?"
+                            : dialogAction === "print"
+                                ? "Are you sure you want to print this employee's information?"
+                                : "Are you sure you want to delete this employee?"
                     }
                     onClose={confirmAction}
                     showYesOrNo={true}

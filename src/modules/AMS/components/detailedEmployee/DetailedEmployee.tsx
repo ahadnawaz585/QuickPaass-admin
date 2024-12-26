@@ -10,6 +10,7 @@ import './styles/DetailedEmployee.scss';
 
 interface DetailedEmployeeProps {
   employee: Employee;
+  onPrint: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -17,6 +18,7 @@ interface DetailedEmployeeProps {
 const DetailedEmployee: React.FC<DetailedEmployeeProps> = ({ 
   employee, 
   onEdit, 
+  onPrint,
   onDelete 
 }) => {
   const [activeTab, setActiveTab] = useState('attendance');
@@ -47,6 +49,7 @@ const DetailedEmployee: React.FC<DetailedEmployeeProps> = ({
     <div className="detailed-employee">
       <EmployeeHeader 
         employee={employee} 
+        onPrint={onPrint}
         onEdit={onEdit}
         onDelete={onDelete}
       />
