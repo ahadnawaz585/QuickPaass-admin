@@ -1,0 +1,32 @@
+.attendance-page {
+    padding: 24px;
+  
+    .header {
+      margin-bottom: 24px;
+    }
+  
+    .qr-scanner-container {
+      max-width: 500px;
+      margin: 24px auto;
+      
+      .scanner-wrapper {
+        position: relative;
+        aspect-ratio: 1;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+    }
+  
+    .attendance-grid {
+      margin-top: 24px;
+      height: 400px;
+    }
+  
+    .manual-attendance {
+      margin-top: 24px;
+      padding: 24px;
+      border-radius: 8px;
+      background-color: #f5f5f5;
+    }
+  }
