@@ -21,8 +21,8 @@ import DialogueComponent from '@/components/shared/dialogue/dialogue';
 
 const Component = () => {
     const employeeService = new EmployeeService();
-    const columns: string[] = ['code', 'name', 'surname', 'address', 'joiningDate', 'contactNo', 'designation', 'department', 'company', 'image'];
-    const columnMappings: { [key: string]: string } = { 'name': 'Name', 'surname': 'Surname', 'address': 'Address', 'joiningDate': 'Joining', 'contactNo': 'Contact', 'company': 'Company', 'code': 'Code', 'designation': 'Designation', 'department': 'Department', 'image': 'Image' };
+    const columns: string[] = ['code', 'name', 'surname', 'designation', 'department' ,'address', 'contactNo', 'company', 'image'];
+    const columnMappings: { [key: string]: string } = { 'name': 'Name', 'surname': 'Surname', 'address': 'Address','contactNo': 'Contact', 'company': 'Company', 'code': 'Code', 'designation': 'Designation', 'department': 'Department', 'image': 'Image' };
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [employeeData, setEmployeeData] = useState<Employee[]>([]);
