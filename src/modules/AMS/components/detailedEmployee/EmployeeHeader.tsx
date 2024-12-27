@@ -15,7 +15,7 @@ interface EmployeeHeaderProps {
   onDelete: () => void;
 }
 
-const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDelete ,onPrint}) => {
+const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDelete, onPrint }) => {
   const [showImageModal, setShowImageModal] = useState(false);
   const age = calculateAge(employee.dob.toString());
   const workDuration = calculateWorkDuration(employee.joiningDate.toString());
@@ -44,11 +44,12 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDel
           <div className="employee-header__info">
             <div className="employee-header__title">
               <h2>{`${employee.name} ${employee.surname}`}</h2>
+              <p>{employee.company}</p>
               <p>{employee.designation}</p>
               <p>{employee.department}</p>
               <div className="employee-header__qr">
                 {/* <Barcode value={employee.code} width={1} height={30} /> */}
-                <QRCodeSVG value={employee.code} size={80} />
+                <QRCodeSVG value={employee.code} size={90} />
               </div>
 
             </div>
@@ -58,15 +59,21 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDel
               {/* Display the QR code for the employee code */}
               <InfoItem label="Age" value={`${age} years`} />
               <InfoItem label="Work Duration" value={workDuration} />
+
+              <InfoItem label="Address" value={employee.address} />
+
             </div>
 
             <div>
-              <InfoItem label="Contact" value={employee.contactNo} />
+            <InfoItem label="Contact" value={employee.contactNo} />
+              {(employee.emergencyContactNo && employee.emergencyContactNo != '') && <InfoItem label="Emergency Contact" value={employee.emergencyContactNo} />}
               <InfoItem label="Blood Group" value={employee.bloodGroup} />
-              <InfoItem label="Address" value={employee.address} />
+              {(employee.martialStatus && employee.martialStatus != '') && <InfoItem label="Martial Status" value={employee.martialStatus} />}
+              {(employee.noOfChildrens && employee.noOfChildrens != null) && <InfoItem label="No of Childresn" value={employee.noOfChildrens.toString()} />}
             </div>
-
           </div>
+          <div></div>
+
         </div>
       </div>
 
