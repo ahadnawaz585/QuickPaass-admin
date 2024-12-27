@@ -15,7 +15,7 @@ interface EmployeeHeaderProps {
   onDelete: () => void;
 }
 
-const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDelete ,onPrint}) => {
+const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDelete, onPrint }) => {
   const [showImageModal, setShowImageModal] = useState(false);
   const age = calculateAge(employee.dob.toString());
   const workDuration = calculateWorkDuration(employee.joiningDate.toString());
@@ -48,7 +48,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDel
               <p>{employee.department}</p>
               <div className="employee-header__qr">
                 {/* <Barcode value={employee.code} width={1} height={30} /> */}
-                <QRCodeSVG value={employee.code} size={80} />
+                <QRCodeSVG value={employee.code} size={100} />
               </div>
 
             </div>
@@ -58,15 +58,18 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDel
               {/* Display the QR code for the employee code */}
               <InfoItem label="Age" value={`${age} years`} />
               <InfoItem label="Work Duration" value={workDuration} />
+              <InfoItem label="Address" value={employee.address} />
+
             </div>
 
             <div>
               <InfoItem label="Contact" value={employee.contactNo} />
+              {(employee.emergencyContactNo && employee.emergencyContactNo != '') && <InfoItem label="Emergency Contact" value={employee.emergencyContactNo} />}
               <InfoItem label="Blood Group" value={employee.bloodGroup} />
-              <InfoItem label="Address" value={employee.address} />
             </div>
-
           </div>
+          <div></div>
+
         </div>
       </div>
 

@@ -39,6 +39,7 @@ interface Employee {
     bloodGroup: string;
     dob: null | Dayjs | undefined;
     contactNo: string;
+    emergencyContactNo?: string;
     designation: string;
     department: string;
     martialStatus: string;
@@ -64,6 +65,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
         userId: employee?.userId || undefined,
         dob: employee?.dob ? dayjs(employee.dob) : null,
         contactNo: employee?.contactNo || "",
+        emergencyContactNo:employee?.emergencyContactNo || '',
         designation: employee?.designation || "",
         department: employee?.department || "",
         martialStatus: employee?.martialStatus || "",
@@ -174,9 +176,19 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
                                 required
                             />
                         </Grid>
+                     
                     </Grid>
                     {/* Date Information */}
                     <Grid container spacing={3}>
+                    <Grid item xs={12} md={4}>
+                            <TextField
+                                label=" Emergency Contact Number"
+                                name="emergencyContactNo"
+                                value={formData.emergencyContactNo}
+                                onChange={handleInputChange}
+                                fullWidth
+                            />
+                        </Grid>
                         <Grid item xs={12} md={4}>
                          
                                 <DatePicker
