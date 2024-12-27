@@ -2,21 +2,27 @@
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import PageEvent from '@mui/material/Pagination';
 import { useRouter } from 'next/navigation';
-
+import * as FileSaver from 'file-saver';
 import Loader from '@/components/shared/loader/loader';
 const TableComponent = React.lazy(() => import('@/components/shared/table/table'));
 const DynamicSnackbar = React.lazy(() => import('@/components/shared/snackbar/snackbar'));
 const ContentHeaderComponent = React.lazy(() => import('@/components/shared/contentHeader/contentHeader'));
 
 import EmployeeService from '../../services/employee.service';
-import { formatDate } from '@/utils/date';
 import { Employee } from '@/types/AMS/employee';
 import withPermission from '@/components/HOC/withPermission';
 
+// MUI imports for icons
+import { IconButton } from '@mui/material';
+import { FileDownload, InsertDriveFile } from '@mui/icons-material';
+
+// Import the DialogueComponent
+import DialogueComponent from '@/components/shared/dialogue/dialogue';
+
 const Component = () => {
     const employeeService = new EmployeeService();
-    const columns: string[] = ['code','name','surname','address','joiningDate','contactNo','designation','department','company','image'];
-    const columnMappings: { [key: string]: string } = { 'name': 'Name' ,'surname': 'Surname','address':'Address','joiningDate':'Joining','contactNo':'Contact','company':'Company','code':'Code','designation':'Designation','department':'Department','image':'Image'};
+    const columns: string[] = ['code', 'name', 'surname', 'address', 'joiningDate', 'contactNo', 'designation', 'department', 'company', 'image'];
+    const columnMappings: { [key: string]: string } = { 'name': 'Name', 'surname': 'Surname', 'address': 'Address', 'joiningDate': 'Joining', 'contactNo': 'Contact', 'company': 'Company', 'code': 'Code', 'designation': 'Designation', 'department': 'Department', 'image': 'Image' };
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [employeeData, setEmployeeData] = useState<Employee[]>([]);
@@ -29,10 +35,13 @@ const Component = () => {
     const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
     const [snackbarText, setSnackbarText] = useState<string>('');
     const [searching, setSearching] = useState<boolean>(false);
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false); // State for dialog visibility
+    const [isDownloadConfirmed, setIsDownloadConfirmed] = useState<boolean>(false); // State for user's confirmation
 
     const router = useRouter();
 
     useEffect(() => {
+        setDialogOpen(false); 
         if (searching) {
             searchEmployees(searchArray);
         } else {
@@ -75,6 +84,20 @@ const Component = () => {
         }
     }, [currentPage, pageSize, searchArray, employeeService]);
 
+    const downloadExcel = async () => {
+        try {
+            const response = await employeeService.generateExcel(); // Ensure this returns a Blob
+            const blob = new Blob([response], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            });
+            FileSaver.saveAs(blob, `${Date.now()}-employees.xlsx`);
+            setSnackbarText('Excel downloaded successfully !!');
+            setSnackbarOpen(true);
+        } catch (error) {
+            console.error("Error generating excel:", error);
+        }
+    };
+
     const deleteEmployee = async (id: string) => {
         try {
             await employeeService.deleteEmployee(id);
@@ -88,49 +111,22 @@ const Component = () => {
         }
     };
 
-    const handlePageChange = (event: typeof PageEvent, page: number) => {
-        setCurrentPage(page + 1);
-        if (searching) {
-            searchEmployees(searchArray);
-        } else {
-            fetchData();
-        }
+    const handleDownloadClick = () => {
+        setDialogOpen(true); // Open dialog when the download button is clicked
     };
 
-    const handleRowSelected = (id: string) => {
-        router.push(`/admin/ams/employee/${id}`);
-    };
-
-    const handleEditRow = (id: string) => {
-        router.push(`/admin/ams/employee/edit/${id}`);
-    };
-
-    const handleDeleteRow = (id: string) => {
-        deleteEmployee(id);
-    };
-
-    const handleSearchArrayChange = (searchArray: string[]) => {
-        setSearchArray(searchArray);
-        searchEmployees(searchArray);
-    };
-
-    const handleButtonClicked = () => {
-        router.push('/admin/ams/employee/new');
-    };
-
-    const handlePageSizeChange = (pageSize: number) => {
-        setPageSize(pageSize);
-        setCurrentPage(1); // Reset current page to 1 when page size changes
-        if (searching) {
-            searchEmployees(searchArray);
-        } else {
-            fetchData();
+    const handleDialogClose = (confirmed: boolean) => {
+        setDialogOpen(false); // Close dialog
+        if (confirmed) {
+            downloadExcel(); // Proceed with download if confirmed
         }
     };
 
     return (
         <div>
             <Suspense fallback={<Loader />}>
+
+                {/* Content Header */}
                 <div>
                     <ContentHeaderComponent
                         searchPlaceholder="Search Employees"
@@ -140,10 +136,14 @@ const Component = () => {
                         feature='employee.create.*'
                         headerTitle="Employees"
                         search={true}
-                        onButtonClick={handleButtonClicked}
-                        onSearchArrayChange={handleSearchArrayChange}
+                        onButtonClick={() => router.push('/admin/ams/employee/new')}
+                        onSearchArrayChange={(searchArray) => {
+                            setSearchArray(searchArray);
+                            searchEmployees(searchArray);
+                        }}
                     />
                 </div>
+
             </Suspense>
 
             {loadingData ? (
@@ -154,17 +154,24 @@ const Component = () => {
                         <TableComponent
                             editPermission='employee.update.*'
                             deletePermission='employee.delete.*'
-                            handlePageSizeChange={handlePageSizeChange}
+                            handlePageSizeChange={(pageSize) => {
+                                setPageSize(pageSize);
+                                setCurrentPage(1);
+                                fetchData();
+                            }}
                             tableData={tableData}
                             tableColumns={columns}
                             columnMappings={columnMappings}
                             totalSize={totalSize}
                             currentPage={currentPage}
                             pageSize={pageSize}
-                            onPageChange={handlePageChange}
-                            onRowSelected={handleRowSelected}
-                            onEditRow={handleEditRow}
-                            onDeleteRow={handleDeleteRow}
+                            onPageChange={(event, page) => {
+                                setCurrentPage(page + 1);
+                                fetchData();
+                            }}
+                            onRowSelected={(id) => router.push(`/admin/ams/employee/${id}`)}
+                            onEditRow={(id) => router.push(`/admin/ams/employee/edit/${id}`)}
+                            onDeleteRow={deleteEmployee}
                             noDataMessage={noDataMessage}
                         />
                     </Suspense>
@@ -175,6 +182,34 @@ const Component = () => {
                     )}
                 </>
             )}
+
+            {/* Download Button - only shown when dialog is confirmed */}
+            <IconButton
+                onClick={handleDownloadClick}
+                style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    backgroundColor: '#4CAF50', // Green button
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '50%',
+                    // padding: '10px 20px',
+                    padding:'20px',
+                    cursor: 'pointer',
+                    zIndex: 1000,
+                }}
+            >
+                <FileDownload />
+            </IconButton>
+
+            {/* Dialog Component */}
+         {dialogOpen &&   <DialogueComponent
+                heading="Download Excel"
+                question="Do you want to download the employee data as an Excel file?"
+                onClose={handleDialogClose}
+                showYesOrNo={true}
+            />}
         </div>
     );
 };

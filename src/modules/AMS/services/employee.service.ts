@@ -3,6 +3,7 @@ import { BaseService } from "@/utils/base.service";
 import { paginatedData } from "@/types/paginatedData";
 import { environment } from "@/environment/environment";
 import { Employee } from "@/types/AMS/employee";
+import * as FileSaver from "file-saver";
 
 class EmployeeService extends BaseService {
   private baseUrl = environment.apiUrl + "/employee";
@@ -161,6 +162,17 @@ class EmployeeService extends BaseService {
         throw error;
       });
   }
+
+  generateExcel() {
+    return axiosInstance
+       .get(`${this.baseUrl}/getExcel`, { responseType: 'blob' }) // Add responseType: 'blob'
+       .then((response) => response.data)
+       .catch((error) => {
+         console.error("Error generating Excel file:", error);
+         throw error;
+       });
+ }
+ 
 }
 
 export default EmployeeService;
