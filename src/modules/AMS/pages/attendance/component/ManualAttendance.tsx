@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
-  TextField,
   Button,
   FormControl,
   InputLabel,
@@ -9,13 +8,19 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from '@mui/material';
+import { DateTimePicker } from '@mui/x-date-pickers';
+import dayjs, { Dayjs } from 'dayjs';
 export enum AttendanceStatus {
-    PRESENT = 'PRESENT',
-    ABSENT = 'ABSENT',
-    LATE = 'LATE',
-    HALF_DAY = 'HALF_DAY'
-  }
-import dayjs from 'dayjs';
+  PRESENT = 'PRESENT',
+  ABSENT = 'ABSENT',
+  LATE = 'LATE',
+  HALF_DAY = 'HALF_DAY'
+}
+
+import { Employee } from '@/types/AMS/employee';
+import EmployeeService from '@/modules/AMS/services/employee.service';
+import EmployeeAutocomplete from '@/components/shared/EmployeeAutoComplete/EmployeeAutoComplete';
+import SearchTypeToggle from './SearchTypeToggle';
 
 interface ManualAttendanceProps {
   onSubmit: (employeeId: string, status: AttendanceStatus, date: Date) => void;
@@ -24,34 +29,60 @@ interface ManualAttendanceProps {
 const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
   const [employeeId, setEmployeeId] = useState('');
   const [status, setStatus] = useState<AttendanceStatus>(AttendanceStatus.PRESENT);
-  const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [dateTime, setDateTime] = useState<Dayjs>(dayjs());
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [searchType, setSearchType] = useState<'name' | 'code'>('name');
+  const [loading, setLoading] = useState(false);
+  const service = new EmployeeService();
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      const data = await service.getAllEmployees();
+      setEmployees(data);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (employeeId && date) {
-      onSubmit(employeeId, status, new Date(date));
+    if (employeeId && dateTime) {
+      onSubmit(employeeId, status, dateTime.toDate());
       setEmployeeId('');
-      setDate(dayjs().format('YYYY-MM-DD'));
+      setDateTime(dayjs());
     }
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit} className="manual-attendance">
-      <TextField
-        fullWidth
-        label="Employee ID"
-        value={employeeId}
-        onChange={(e) => setEmployeeId(e.target.value)}
-        margin="normal"
+      <SearchTypeToggle 
+        searchType={searchType}
+        onSearchTypeChange={setSearchType}
       />
+      
+      <EmployeeAutocomplete
+        employees={employees}
+        value={employeeId}
+        onChange={setEmployeeId}
+        searchType={searchType}
+      />
+
       <FormControl fullWidth margin="normal">
         <InputLabel>Status</InputLabel>
         <Select
           value={status}
           label="Status"
-          onChange={(e: SelectChangeEvent) => 
+          onChange={(e: SelectChangeEvent) =>
             setStatus(e.target.value as AttendanceStatus)
           }
+          required
         >
           <MenuItem value={AttendanceStatus.PRESENT}>Present</MenuItem>
           <MenuItem value={AttendanceStatus.ABSENT}>Absent</MenuItem>
@@ -59,20 +90,27 @@ const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
           <MenuItem value={AttendanceStatus.HALF_DAY}>Half Day</MenuItem>
         </Select>
       </FormControl>
-      <TextField
-        fullWidth
-        label="Date"
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        margin="normal"
+
+      <DateTimePicker
+        label="Date & Time"
+        value={dateTime}
+        onChange={(newValue) => newValue && setDateTime(newValue)}
+        slotProps={{
+          textField: {
+            fullWidth: true,
+            margin: "normal",
+            required: true
+          }
+        }}
       />
+
       <Button
         type="submit"
         variant="contained"
         color="primary"
         fullWidth
         sx={{ mt: 2 }}
+        disabled={loading || !employeeId}
       >
         Mark Attendance
       </Button>

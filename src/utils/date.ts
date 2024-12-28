@@ -1,6 +1,6 @@
 export const formatDate = (dateString: string) => {
-    if(dateString===''){
-        return '';
+    if(dateString==='' || !dateString){
+        return '-';
     }
     const date = new Date(dateString);
     const options: Intl.DateTimeFormatOptions = { day: 'numeric',  month: 'short', year: 'numeric' };
