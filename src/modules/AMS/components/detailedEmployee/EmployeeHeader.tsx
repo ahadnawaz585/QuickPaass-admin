@@ -49,7 +49,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDel
               <p>{employee.department}</p>
               <div className="employee-header__qr">
                 {/* <Barcode value={employee.code} width={1} height={30} /> */}
-                <QRCodeSVG value={employee.code} size={90} />
+                <QRCodeSVG value={employee.code} size={130} />
               </div>
 
             </div>
@@ -59,17 +59,17 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onEdit, onDel
               {/* Display the QR code for the employee code */}
               <InfoItem label="Age" value={`${age} years`} />
               <InfoItem label="Work Duration" value={workDuration} />
-
-              <InfoItem label="Address" value={employee.address} />
-
+              <InfoItem label="CNIC" value={employee.cnic} />
+              <InfoItem label="Contact" value={employee.contactNo} />
             </div>
 
             <div>
-            <InfoItem label="Contact" value={employee.contactNo} />
+
               {(employee.emergencyContactNo && employee.emergencyContactNo != '') && <InfoItem label="Emergency Contact" value={employee.emergencyContactNo} />}
               <InfoItem label="Blood Group" value={employee.bloodGroup} />
               {(employee.martialStatus && employee.martialStatus != '') && <InfoItem label="Martial Status" value={employee.martialStatus} />}
-              {(employee.noOfChildrens && employee.noOfChildrens != null) && <InfoItem label="No of Childresn" value={employee.noOfChildrens.toString()} />}
+              {(employee.martialStatus == 'married' && employee.noOfChildrens) && <InfoItem label="No of Childresn" value={employee.noOfChildrens.toString()} />}
+              <InfoItem label="Address" value={employee.address} />
             </div>
           </div>
           <div></div>

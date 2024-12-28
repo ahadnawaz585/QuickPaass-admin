@@ -35,6 +35,7 @@ interface Employee {
     name: string;
     surname: string;
     address: string;
+    cnic: string;
     joiningDate: null | Dayjs | undefined;
     bloodGroup: string;
     dob: null | Dayjs | undefined;
@@ -58,6 +59,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
         name: employee?.name || "",
         surname: employee?.surname || "",
         address: employee?.address || "",
+        cnic: employee?.cnic || "",
         joiningDate: employee?.joiningDate ? dayjs(employee?.joiningDate) : null,
         bloodGroup: employee?.bloodGroup || "",
         company: employee?.company || Company.SOLARMAX,
@@ -65,7 +67,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
         userId: employee?.userId || undefined,
         dob: employee?.dob ? dayjs(employee.dob) : null,
         contactNo: employee?.contactNo || "",
-        emergencyContactNo:employee?.emergencyContactNo || '',
+        emergencyContactNo: employee?.emergencyContactNo || '',
         designation: employee?.designation || "",
         department: employee?.department || "",
         martialStatus: employee?.martialStatus || "",
@@ -90,7 +92,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
             console.log(data)
             setUsers(data);
         }
-        else{
+        else {
             const data = await userService.getNonAssociatedUsers();
             console.log(data)
             setUsers(data);
@@ -166,6 +168,8 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
                             />
                         </Grid>
 
+
+
                         <Grid item xs={12} md={4}>
                             <TextField
                                 label="Contact Number"
@@ -176,11 +180,31 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
                                 required
                             />
                         </Grid>
-                     
+
                     </Grid>
                     {/* Date Information */}
                     <Grid container spacing={3}>
-                    <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                                label="CNIC"
+                                name="cnic"
+                                value={formData.cnic}
+                                onChange={(e) => {
+                                    let value = e.target.value.replace(/[^0-9]/g, ""); // Allow only numbers
+                                    if (value.length > 5) value = `${value.slice(0, 5)}-${value.slice(5)}`;
+                                    if (value.length > 13) value = `${value.slice(0, 13)}-${value.slice(13)}`;
+                                    if (value.length > 15) value = value.slice(0, 15); // Limit length to 15 characters
+                                    handleInputChange({ target: { name: "cnic", value } });
+                                }}
+                                fullWidth
+                                required
+                                inputProps={{
+                                    maxLength: 15, // Enforce maximum length
+                                }}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12} md={4}>
                             <TextField
                                 label=" Emergency Contact Number"
                                 name="emergencyContactNo"
@@ -190,30 +214,22 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
                             />
                         </Grid>
                         <Grid item xs={12} md={4}>
-                         
-                                <DatePicker
-                                    label="Date of Birth"
-                                    value={formData.dob}
-                                    onChange={handleDateChange("dob")}
-                                    slotProps={{
-                                        textField: { fullWidth: true, required: true },
-                                    }}
-                                />
-                           
+
+                            <DatePicker
+                                views={['day', 'month', 'year']}
+                                label="Date of Birth"
+                                value={formData.dob}
+                                onChange={handleDateChange("dob")}
+                                //    inputFormat="dd.MM.yyyy"
+                                format="DD/MM/YYYY"
+                                slotProps={{
+                                    textField: { fullWidth: true, required: true },
+                                }}
+                            />
+
                         </Grid>
 
-                        <Grid item xs={12} md={4}>
-                         
-                                <DatePicker
-                                    label="Joining Date"
-                                    value={formData.joiningDate}
-                                    onChange={handleDateChange("joiningDate")}
-                                    slotProps={{
-                                        textField: { fullWidth: true, required: true },
-                                    }}
-                                />
-                           
-                        </Grid>
+
 
                         <Grid item xs={12} md={4}>
                             <FormControl fullWidth>
@@ -260,6 +276,21 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
                                 fullWidth
                                 required
                             />
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+
+                            <DatePicker
+                                label="Joining Date"
+                                views={['day', 'month', 'year']}
+                                format="DD/MM/YYYY"
+                                value={formData.joiningDate}
+                                onChange={handleDateChange("joiningDate")}
+                                slotProps={{
+                                    textField: { fullWidth: true, required: true },
+                                }}
+                            />
+
                         </Grid>
 
                         <Grid item xs={12} md={6}>
