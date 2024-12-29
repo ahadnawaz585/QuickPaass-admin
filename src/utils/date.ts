@@ -7,6 +7,22 @@ export const formatDate = (dateString: string) => {
     return date.toLocaleDateString('en-GB', options).replace(/ /g, '-');
 };
 
+export const formatTime = (dateString: string) => {
+  if(!dateString){
+    return '-';
+  }
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true, // Use 12-hour format
+  };
+  return date.toLocaleTimeString('en-GB', options); // Use toLocaleTimeString for time only
+};
+
+
+
 
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';

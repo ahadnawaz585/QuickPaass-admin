@@ -14,7 +14,7 @@ export enum AttendanceStatus {
   PRESENT = 'PRESENT',
   ABSENT = 'ABSENT',
   LATE = 'LATE',
-  HALF_DAY = 'HALF_DAY'
+  ON_LEAVE = 'ON_LEAVE'
 }
 
 import { Employee } from '@/types/AMS/employee';
@@ -87,7 +87,7 @@ const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
           <MenuItem value={AttendanceStatus.PRESENT}>Present</MenuItem>
           <MenuItem value={AttendanceStatus.ABSENT}>Absent</MenuItem>
           <MenuItem value={AttendanceStatus.LATE}>Late</MenuItem>
-          <MenuItem value={AttendanceStatus.HALF_DAY}>Half Day</MenuItem>
+          <MenuItem value={AttendanceStatus.ON_LEAVE}>Leave</MenuItem>
         </Select>
       </FormControl>
 

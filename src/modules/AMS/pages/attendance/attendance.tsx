@@ -9,7 +9,7 @@ import {
   Alert,
   Snackbar,
 } from "@mui/material";
-import { formatDate } from "@/utils/date"; // Assuming you have this function
+import { formatDate, formatTime } from "@/utils/date";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import QRScanner from "./component/QRScanner";
@@ -18,11 +18,13 @@ import AttendanceService from "../../services/attendance.service";
 import EmployeeService from "../../services/employee.service";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import DialogueComponent from "@/components/shared/dialogue/dialogue";
+
 export enum AttendanceStatus {
   PRESENT = "PRESENT",
   ABSENT = "ABSENT",
   LATE = "LATE",
-  HALF_DAY = "HALF_DAY",
+  ON_LEAVE = 'ON_LEAVE',
 }
 
 export interface Attendance {
@@ -40,6 +42,7 @@ export interface Attendance {
   employeeSurname: string;
   designation: string;
 }
+
 import { useRouter } from "next/navigation";
 import "./styles/AttendancePage.scss";
 
@@ -61,6 +64,12 @@ const AttendancePage: React.FC = () => {
     message: "",
     severity: "success",
   });
+  const [dialogProps, setDialogProps] = useState({
+    open: false,
+    heading: "",
+    question: "",
+    onClose: (confirm: boolean) => {},
+  });
 
   useEffect(() => {
     loadAttendances();
@@ -77,25 +86,42 @@ const AttendancePage: React.FC = () => {
 
   const handleScanSuccess = async (employeeId: string) => {
     try {
-      const employee = await employeeService.getEmployeeById(employeeId);
-      if (employee) {
-        const attendance: Attendance = {
-          employeeId,
-          date: new Date(),
-          status: AttendanceStatus.PRESENT,
-          checkIn: new Date(),
-          checkOut: undefined,
-          location: "",
-          employeeName: employee.name,
-          employeeSurname: employee.surname,
-          designation: employee.designation,
-        };
-        await attendanceService.createAttendance(attendance);
-        showNotification("Attendance marked successfully", "success");
-        loadAttendances();
+      // Call the checkAttendance API to get attendance status
+      const response = await attendanceService.checkAttendance(employeeId,AttendanceStatus.PRESENT);
+      const { success, message }:any = response.data;
+
+      if (success) {
+        // Show dialog with attendance status
+        setDialogProps({
+          open: true,
+          heading: "Attendance Status",
+          question: `${message}`,
+          onClose: async (confirm) => {
+            setDialogProps({ ...dialogProps, open: false });
+            if (confirm) {
+              const employee = await employeeService.getEmployeeById(employeeId);
+              if (employee) {
+                const attendance: Attendance = {
+                  employeeId,
+                  date: new Date(),
+                  status: AttendanceStatus.PRESENT,
+                  checkIn: new Date(),
+                  checkOut: undefined,
+                  location: "",
+                  employeeName: employee.name,
+                  employeeSurname: employee.surname,
+                  designation: employee.designation,
+                };
+                await attendanceService.createAttendance(attendance);
+                showNotification("Attendance marked successfully", "success");
+                loadAttendances();
+              }
+            }
+          },
+        });
       }
     } catch (error) {
-      showNotification("Error marking attendance", "error");
+      showNotification("Error checking attendance", "error");
     }
   };
 
@@ -105,20 +131,38 @@ const AttendancePage: React.FC = () => {
     date: Date
   ) => {
     try {
-      const employee = await employeeService.getEmployeeById(employeeId);
-      if (employee) {
-        const attendance: any = {
-          employeeId,
-          date,
-          status,
-          checkIn: status === AttendanceStatus.PRESENT ? date : null,
-          checkOut: null,
-          location: "",
-        };
-        await attendanceService.createAttendance(attendance);
-        showNotification("Attendance marked successfully", "success");
-        loadAttendances();
+      // Call the checkAttendance API to check current attendance status
+      const response = await attendanceService.checkAttendance(employeeId,status);
+      const { success, message }:any = response.data;
+
+      if (success) {
+        // Show dialog with the current attendance status before marking
+        setDialogProps({
+          open: true,
+          heading: "Confirm Attendance",
+          question: `${message}`,
+          onClose: async (confirm) => {
+            setDialogProps({ ...dialogProps, open: false });
+            if (confirm) {
+              const employee = await employeeService.getEmployeeById(employeeId);
+              if (employee) {
+                const attendance: any = {
+                  employeeId,
+                  date,
+                  status,
+                  checkIn: status === AttendanceStatus.PRESENT ? date : null,
+                  checkOut: null,
+                  location: "",
+                };
+                await attendanceService.markAttendance(attendance);
+                showNotification("Attendance marked successfully", "success");
+                loadAttendances();
+              }
+            }
+          },
+        });
       }
+
     } catch (error) {
       showNotification("Error marking attendance", "error");
     }
@@ -133,7 +177,7 @@ const AttendancePage: React.FC = () => {
 
   const handleRowClick = (params: any) => {
     const selectedAttendance = params.row;
-    router.push(`/admin/ams/employee/${selectedAttendance.employeeId}`)
+    router.push(`/admin/ams/employee/${selectedAttendance.employeeId}`);
   };
 
   const columns: GridColDef[] = [
@@ -155,13 +199,13 @@ const AttendancePage: React.FC = () => {
       field: "checkIn",
       headerName: "Check In",
       width: 130,
-      renderCell: (params) => formatDate(params.value),
+      renderCell: (params) => formatTime(params.value),
     },
     {
       field: "checkOut",
       headerName: "Check Out",
       width: 130,
-      renderCell: (params) => formatDate(params.value),
+      renderCell: (params) => formatTime(params.value),
     },
   ];
 
@@ -188,7 +232,9 @@ const AttendancePage: React.FC = () => {
               {activeTab === 0 ? (
                 <QRScanner onScanSuccess={handleScanSuccess} />
               ) : (
-                <ManualAttendance onSubmit={handleManualAttendance} />
+                <ManualAttendance
+                  onSubmit={handleManualAttendance}
+                />
               )}
             </Box>
           </Paper>
@@ -220,10 +266,19 @@ const AttendancePage: React.FC = () => {
               {notification.message}
             </Alert>
           </Snackbar>
+
+          {/* Confirmation Dialog */}
+          {dialogProps.open && (
+            <DialogueComponent
+              heading={dialogProps.heading}
+              question={dialogProps.question}
+              onClose={dialogProps.onClose}
+            />
+          )}
         </Box>
       </>
     </LocalizationProvider>
   );
 };
 
-export default AttendancePage; 
+export default AttendancePage;

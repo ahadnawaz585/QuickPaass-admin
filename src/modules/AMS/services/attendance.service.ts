@@ -3,6 +3,7 @@ import { BaseService } from "@/utils/base.service";
 import { paginatedData } from "@/types/paginatedData";
 import { environment } from "@/environment/environment";
 import { Attendance} from "@/types/AMS/attendance";
+import { AttendanceStatus } from "../pages/attendance/component/ManualAttendance";
 
 class AttendanceService extends BaseService {
   private baseUrl = environment.apiUrl + "/attendance";
@@ -54,6 +55,25 @@ class AttendanceService extends BaseService {
         console.error("Error creating Attendance", error);
         throw error;
       });
+  }
+
+
+  checkAttendance(employeeId:string,status:AttendanceStatus){
+    return axiosInstance
+    .post<void>(`${this.baseUrl}/checkAttendance`, {employeeId,status})
+    .catch((error) => {
+      console.error("Error checking Attendance", error);
+      throw error;
+    });
+  }
+
+  markAttendance(AttendanceData: Attendance){
+    return axiosInstance
+    .post<void>(`${this.baseUrl}/markAttendance`, AttendanceData)
+    .catch((error) => {
+      console.error("Error marking Attendance", error);
+      throw error;
+    });
   }
 
   updateAttendance(id: string, AttendanceData: Attendance) {
