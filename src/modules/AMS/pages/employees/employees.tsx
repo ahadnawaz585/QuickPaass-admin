@@ -7,7 +7,6 @@ import Loader from '@/components/shared/loader/loader';
 const TableComponent = React.lazy(() => import('@/components/shared/table/table'));
 const DynamicSnackbar = React.lazy(() => import('@/components/shared/snackbar/snackbar'));
 const ContentHeaderComponent = React.lazy(() => import('@/components/shared/contentHeader/contentHeader'));
-
 import EmployeeService from '../../services/employee.service';
 import { Employee } from '@/types/AMS/employee';
 import withPermission from '@/components/HOC/withPermission';
@@ -18,11 +17,12 @@ import { FileDownload, InsertDriveFile } from '@mui/icons-material';
 
 // Import the DialogueComponent
 import DialogueComponent from '@/components/shared/dialogue/dialogue';
+import { parseEnv } from 'util';
 
 const Component = () => {
     const employeeService = new EmployeeService();
-    const columns: string[] = ['code', 'name', 'surname', 'designation', 'department' ,'address', 'contactNo', 'company', 'image'];
-    const columnMappings: { [key: string]: string } = { 'name': 'Name', 'surname': 'Surname', 'address': 'Address','contactNo': 'Contact', 'company': 'Company', 'code': 'Code', 'designation': 'Designation', 'department': 'Department', 'image': 'Image' };
+    const columns: string[] = ['code', 'name', 'surname', 'designation', 'department', 'address', 'contactNo', 'company', 'image'];
+    const columnMappings: { [key: string]: string } = { 'name': 'Name', 'surname': 'Surname', 'address': 'Address', 'contactNo': 'Contact', 'company': 'Company', 'code': 'Code', 'designation': 'Designation', 'department': 'Department', 'image': 'Image' };
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [employeeData, setEmployeeData] = useState<Employee[]>([]);
@@ -41,11 +41,11 @@ const Component = () => {
     const router = useRouter();
 
     useEffect(() => {
-        setDialogOpen(false); 
+        setDialogOpen(false);
         if (searching) {
             searchEmployees(searchArray);
         } else {
-            fetchData();
+            fetchData(currentPage, pageSize);
         }
     }, []);
 
@@ -56,19 +56,21 @@ const Component = () => {
         setTableData(data.data);
     };
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (page: number, pageSize: number) => {
+        console.log("Fetching data for page:", page, "for page size :", pageSize);
         setLoadingData(true);
         try {
-            const paginatedData = await employeeService.getEmployees(currentPage, pageSize);
+            const paginatedData = await employeeService.getEmployees(page, pageSize);
             updateEmployeesData(paginatedData);
             setSearching(false);
         } catch (error) {
             setLoadingData(false);
             console.error('Error fetching employees:', error);
-            setSnackbarText('Error fetching Employees ! Please Try Again !');
+            setSnackbarText('Error fetching Employees! Please Try Again!');
             setSnackbarOpen(true);
         }
-    }, []);
+    }, [pageSize, employeeService]);
+
 
     const searchEmployees = useCallback(async (searchArray: string[]) => {
         setLoadingData(true);
@@ -103,7 +105,7 @@ const Component = () => {
             await employeeService.deleteEmployee(id);
             setSnackbarText('Deleted user Successfully ! ');
             setSnackbarOpen(true);
-            fetchData();
+            fetchData(currentPage, pageSize);
         } catch (error) {
             console.error('Error deleting users:', error);
             setSnackbarText('Error deleting user ! Please Try Again !');
@@ -157,7 +159,7 @@ const Component = () => {
                             handlePageSizeChange={(pageSize) => {
                                 setPageSize(pageSize);
                                 setCurrentPage(1);
-                                fetchData();
+                                fetchData(currentPage, pageSize);
                             }}
                             tableData={tableData}
                             tableColumns={columns}
@@ -165,10 +167,14 @@ const Component = () => {
                             totalSize={totalSize}
                             currentPage={currentPage}
                             pageSize={pageSize}
-                            onPageChange={(event, page) => {
-                                setCurrentPage(page + 1);
-                                fetchData();
+                            onPageChange={(page) => {
+                                const newPage = page; // Keep it 1-based as paginator passes 1-based page
+                                setCurrentPage(newPage); // Update the state
+                                console.log("page from paginator : ", newPage);
+                                console.log("page in state before fetchData : ", currentPage); // This will show the previous value due to async state update
+                                fetchData(newPage, pageSize); // Explicitly pass the correct page
                             }}
+
                             onRowSelected={(id) => router.push(`/admin/ams/employee/${id}`)}
                             onEditRow={(id) => router.push(`/admin/ams/employee/edit/${id}`)}
                             onDeleteRow={deleteEmployee}
@@ -184,27 +190,28 @@ const Component = () => {
             )}
 
             {/* Download Button - only shown when dialog is confirmed */}
-            <IconButton
-                onClick={handleDownloadClick}
-                style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    right: '20px',
-                    backgroundColor: '#4CAF50', // Green button
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '50%',
-                    // padding: '10px 20px',
-                    padding:'20px',
-                    cursor: 'pointer',
-                    zIndex: 1000,
-                }}
-            >
-                <FileDownload />
-            </IconButton>
+                <IconButton
+                draggable
+                    onClick={handleDownloadClick}
+                    style={{
+                        position: 'fixed',
+                        bottom: '20px',
+                        left: '20px',
+                        backgroundColor: '#4CAF50', // Green button
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '50%',
+                        // padding: '10px 20px',
+                        padding: '20px',
+                        cursor: 'pointer',
+                        zIndex: 1000,
+                    }}
+                >
+                    <FileDownload />
+                </IconButton>
 
             {/* Dialog Component */}
-         {dialogOpen &&   <DialogueComponent
+            {dialogOpen && <DialogueComponent
                 heading="Download Excel"
                 question="Do you want to download the employee data as an Excel file?"
                 onClose={handleDialogClose}

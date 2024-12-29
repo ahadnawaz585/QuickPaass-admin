@@ -10,7 +10,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { formatDate, formatTime } from "@/utils/date";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef ,GridToolbar} from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import QRScanner from "./component/QRScanner";
 import ManualAttendance from "./component/ManualAttendance";
@@ -244,6 +244,13 @@ const AttendancePage: React.FC = () => {
               rows={attendances}
               columns={columns}
               onRowClick={handleRowClick}
+              slotProps={{
+                loadingOverlay: {
+                  variant: 'skeleton',
+                  noRowsVariant: 'skeleton',
+                },
+              }}
+              slots={{ toolbar: GridToolbar}}
               initialState={{
                 pagination: {
                   paginationModel: { pageSize: 5, page: 0 },
