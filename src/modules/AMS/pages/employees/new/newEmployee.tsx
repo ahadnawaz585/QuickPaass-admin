@@ -36,7 +36,7 @@ const Component = () => {
         router.push('/admin/ams/employee')
     };
 
-    return <>  <LocalizationProvider dateAdapter={AdapterDayjs}><EmployeeForm onSubmit={handleFormSubmit} onDiscard={handleDiscard} /></LocalizationProvider></>;
+    return <>  <LocalizationProvider  dateAdapter={AdapterDayjs}><EmployeeForm onSubmit={handleFormSubmit} onDiscard={handleDiscard} /></LocalizationProvider></>;
 };
 
 const NewEmployee = withPermission(Component,"employee.create.*");
