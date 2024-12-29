@@ -247,6 +247,7 @@ const TableComponent: FC<TableComponentProps> = ({
         checkboxSelection
 
         initialState={{
+          density: 'compact',
           pagination: {
             paginationModel,
           },

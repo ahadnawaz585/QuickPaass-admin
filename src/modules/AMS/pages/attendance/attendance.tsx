@@ -252,6 +252,7 @@ const AttendancePage: React.FC = () => {
               }}
               slots={{ toolbar: GridToolbar}}
               initialState={{
+                density: 'compact',
                 pagination: {
                   paginationModel: { pageSize: 5, page: 0 },
                 },
