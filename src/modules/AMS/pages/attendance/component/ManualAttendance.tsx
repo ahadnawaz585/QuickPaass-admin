@@ -69,11 +69,11 @@ const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
 
   return (
     <Box component="form" onSubmit={handleSubmit} className="manual-attendance">
-      <SearchTypeToggle 
+      <SearchTypeToggle
         searchType={searchType}
         onSearchTypeChange={setSearchType}
       />
-      
+
       <EmployeeAutocomplete
         employees={employees}
         value={employeeId}
@@ -101,8 +101,8 @@ const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
       <DateTimePicker
         label="Date & Time"
         value={dateTime}
-        views={['day', 'month', 'year']}
-        format="DD/MM/YYYY"
+        views={['year', 'month', 'day', 'hours', 'minutes']}
+        format="DD/MM/YYYY hh:mm a"
         onChange={(newValue) => newValue && setDateTime(newValue)}
         slotProps={{
           textField: {
@@ -112,6 +112,7 @@ const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
           }
         }}
       />
+
 
       <Button
         type="submit"
