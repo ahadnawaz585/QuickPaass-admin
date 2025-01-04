@@ -7,6 +7,13 @@ export const formatDate = (dateString: string) => {
     return date.toLocaleDateString('en-GB', options).replace(/ /g, '-');
 };
 
+
+export function getCurrentTimeInPST(): Date {
+  const currentTimeInPST = new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" });
+  return new Date(currentTimeInPST); // Convert the string back to a Date object
+}
+
+
 export const formatTime = (dateString: string) => {
   if(!dateString){
     return '-';

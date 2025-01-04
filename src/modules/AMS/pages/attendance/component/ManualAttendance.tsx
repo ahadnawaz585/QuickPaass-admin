@@ -10,6 +10,13 @@ import {
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+// Extend Day.js with plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 export enum AttendanceStatus {
   PRESENT = 'PRESENT',
   ABSENT = 'ABSENT',
@@ -29,7 +36,7 @@ interface ManualAttendanceProps {
 const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
   const [employeeId, setEmployeeId] = useState('');
   const [status, setStatus] = useState<AttendanceStatus>(AttendanceStatus.PRESENT);
-  const [dateTime, setDateTime] = useState<Dayjs>(dayjs());
+  const [dateTime, setDateTime] = useState<Dayjs>(dayjs().tz("Asia/Karachi"));
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchType, setSearchType] = useState<'name' | 'code'>('name');
   const [loading, setLoading] = useState(false);
@@ -94,6 +101,8 @@ const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
       <DateTimePicker
         label="Date & Time"
         value={dateTime}
+        views={['day', 'month', 'year']}
+        format="DD/MM/YYYY"
         onChange={(newValue) => newValue && setDateTime(newValue)}
         slotProps={{
           textField: {

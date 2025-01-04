@@ -18,7 +18,7 @@ const Component = () => {
 
     useEffect(() => {
         if (employeeId) {
-            fetchData(id);
+            fetchData(id); 
         }
     },[]);
 

@@ -21,6 +21,12 @@ import DynamicSnackbar from "@/components/shared/snackbar/snackbar";
 import UserService from "@/modules/rbac/services/user.service";
 import { User } from "@/types/schema/user";
 import { Employee as schema } from "@/types/AMS/employee";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+// Extend Day.js with plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface EmployeeFormProps {
     employee?: schema | null;
@@ -58,12 +64,12 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
         surname: employee?.surname || "",
         address: employee?.address || "",
         cnic: employee?.cnic || "",
-        joiningDate: employee?.joiningDate ? dayjs(employee?.joiningDate) : null,
+        joiningDate: employee?.joiningDate ? dayjs(employee.joiningDate) :  dayjs().tz("Asia/Karachi"),
         bloodGroup: employee?.bloodGroup || "",
         company: employee?.company || Company.SOLARMAX,
         image: employee?.image || "",
         userId: employee?.userId || undefined,
-        dob: employee?.dob ? dayjs(employee.dob) : null,
+        dob: employee?.dob ? dayjs(employee.dob) :  dayjs().tz("Asia/Karachi"),
         contactNo: employee?.contactNo || "",
         emergencyContactNo: employee?.emergencyContactNo || '',
         designation: employee?.designation || "",
@@ -125,6 +131,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
     };
 
     const handleDateChange = (key: "dob" | "joiningDate") => (date: Dayjs | null) => {
+        const pkTime = dayjs(date).tz("Asia/Karachi").toDate();
         setFormData({ ...formData, [key]: date });
     };
 
