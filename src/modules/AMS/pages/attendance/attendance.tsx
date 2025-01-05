@@ -9,8 +9,10 @@ import {
   Alert,
   Snackbar,
 } from "@mui/material";
+import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { formatDate, formatTime } from "@/utils/date";
-import { DataGrid, GridColDef ,GridToolbar} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import QRScanner from "./component/QRScanner";
 import ManualAttendance from "./component/ManualAttendance";
@@ -68,12 +70,40 @@ const AttendancePage: React.FC = () => {
     open: false,
     heading: "",
     question: "",
-    onClose: (confirm: boolean) => {},
+    onClose: (confirm: boolean) => { },
+  });
+
+  const [stats, setStats] = useState({
+    totalEmployees: 0,
+    presentToday: 0,
+    lateToday: 0,
+    absentToday: 0,
   });
 
   useEffect(() => {
     loadAttendances();
+    loadStats();
   }, []);
+
+
+  const loadStats = async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const totalEmployees = await employeeService.getTotalEmployees();
+      const presentToday = attendances.filter(a => a.status === AttendanceStatus.PRESENT && a.date.toISOString().startsWith(today)).length;
+      const lateToday = attendances.filter(a => a.status === AttendanceStatus.LATE && a.date.toISOString().startsWith(today)).length;
+      const absentToday = totalEmployees - presentToday - lateToday;
+
+      setStats({
+        totalEmployees,
+        presentToday,
+        lateToday,
+        absentToday,
+      });
+    } catch (error) {
+      showNotification("Error loading stats", "error");
+    }
+  };
 
   const loadAttendances = async () => {
     try {
@@ -87,8 +117,8 @@ const AttendancePage: React.FC = () => {
   const handleScanSuccess = async (employeeId: string) => {
     try {
       // Call the checkAttendance API to get attendance status
-      const response = await attendanceService.checkAttendance(employeeId,AttendanceStatus.PRESENT);
-      const { success, message }:any = response.data;
+      const response = await attendanceService.checkAttendance(employeeId, AttendanceStatus.PRESENT);
+      const { success, message }: any = response.data;
 
       if (success) {
         // Show dialog with attendance status
@@ -132,8 +162,8 @@ const AttendancePage: React.FC = () => {
   ) => {
     try {
       // Call the checkAttendance API to check current attendance status
-      const response = await attendanceService.checkAttendance(employeeId,status);
-      const { success, message }:any = response.data;
+      const response = await attendanceService.checkAttendance(employeeId, status);
+      const { success, message }: any = response.data;
 
       if (success) {
         // Show dialog with the current attendance status before marking
@@ -217,28 +247,32 @@ const AttendancePage: React.FC = () => {
             Attendance Management
           </Typography>
 
-          <Paper sx={{ width: "100%", mb: 2 }}>
-            <Tabs
-              value={activeTab}
-              onChange={(_, newValue) => setActiveTab(newValue)}
-              indicatorColor="primary"
-              textColor="primary"
-            >
-              <Tab label="QR Scanner" />
-              <Tab label="Manual Entry" />
-            </Tabs>
-
-            <Box p={3}>
-              {activeTab === 0 ? (
-                <QRScanner onScanSuccess={handleScanSuccess} />
-              ) : (
-                <ManualAttendance
-                  onSubmit={handleManualAttendance}
-                />
-              )}
-            </Box>
-          </Paper>
-
+          <Accordion className="accordion">
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>Attendance Options</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box className="tabs-container">
+                <Tabs
+                  value={activeTab}
+                  onChange={(_, newValue) => setActiveTab(newValue)}
+                  indicatorColor="primary"
+                  textColor="primary"
+                >
+                  <Tab label="QR Scanner" />
+                  <Tab label="Manual Entry" />
+                </Tabs>
+                <Box p={3}>
+                  {activeTab === 0 ? (
+                    <QRScanner onScanSuccess={handleScanSuccess} />
+                  ) : (
+                    <ManualAttendance onSubmit={handleManualAttendance} />
+                  )}
+                </Box>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+          
           <Paper className="attendance-grid">
             <DataGrid
               rows={attendances}
@@ -250,14 +284,17 @@ const AttendancePage: React.FC = () => {
                   noRowsVariant: 'skeleton',
                 },
               }}
-              slots={{ toolbar: GridToolbar}}
+              checkboxSelection
+              keepNonExistentRowsSelected
+              slots={{ toolbar: GridToolbar }}
+              autoHeight
               initialState={{
                 density: 'compact',
                 pagination: {
-                  paginationModel: { pageSize: 5, page: 0 },
+                  paginationModel: { pageSize: 10, page: 0 },
                 },
               }}
-              pageSizeOptions={[5, 10, 25]}
+              pageSizeOptions={[5, 10, 25,50,100]}
             />
           </Paper>
 
