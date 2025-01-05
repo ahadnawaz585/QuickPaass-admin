@@ -8,10 +8,14 @@ import {
   Tabs,
   Alert,
   Snackbar,
+  Grid,
+  Card,
+  CardContent,
 } from "@mui/material";
+import _ from 'lodash';
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { formatDate, formatTime } from "@/utils/date";
+import { formatDate, formatTime, getCurrentTimeInPST } from "@/utils/date";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import QRScanner from "./component/QRScanner";
@@ -21,7 +25,6 @@ import EmployeeService from "../../services/employee.service";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import DialogueComponent from "@/components/shared/dialogue/dialogue";
-
 export enum AttendanceStatus {
   PRESENT = "PRESENT",
   ABSENT = "ABSENT",
@@ -46,7 +49,7 @@ export interface Attendance {
 }
 
 import { useRouter } from "next/navigation";
-import "./styles/AttendancePage.scss";
+import "./attendancePage.scss";
 
 const attendanceService = new AttendanceService();
 const employeeService = new EmployeeService();
@@ -66,6 +69,7 @@ const AttendancePage: React.FC = () => {
     message: "",
     severity: "success",
   });
+
   const [dialogProps, setDialogProps] = useState({
     open: false,
     heading: "",
@@ -75,35 +79,25 @@ const AttendancePage: React.FC = () => {
 
   const [stats, setStats] = useState({
     totalEmployees: 0,
-    presentToday: 0,
-    lateToday: 0,
-    absentToday: 0,
+    present: 0,
+    absent: 0,
+    late: 0,
+    onLeave: 0,
+    pending: 0
   });
 
   useEffect(() => {
-    loadAttendances();
-    loadStats();
+    const fetchData = async () => {
+      await loadAttendances();
+
+    };
+
+    fetchData();
   }, []);
 
-
-  const loadStats = async () => {
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const totalEmployees = await employeeService.getTotalEmployees();
-      const presentToday = attendances.filter(a => a.status === AttendanceStatus.PRESENT && a.date.toISOString().startsWith(today)).length;
-      const lateToday = attendances.filter(a => a.status === AttendanceStatus.LATE && a.date.toISOString().startsWith(today)).length;
-      const absentToday = totalEmployees - presentToday - lateToday;
-
-      setStats({
-        totalEmployees,
-        presentToday,
-        lateToday,
-        absentToday,
-      });
-    } catch (error) {
-      showNotification("Error loading stats", "error");
-    }
-  };
+  useEffect(() => {
+    loadStats();
+  }, [stats.totalEmployees]);
 
   const loadAttendances = async () => {
     try {
@@ -113,6 +107,56 @@ const AttendancePage: React.FC = () => {
       showNotification("Error loading attendances", "error");
     }
   };
+
+  const loadStats = async () => {
+    try {
+      const totalEmployees = await employeeService.getTotalEmployees();
+      const present = attendances.filter(a => a.status === AttendanceStatus.PRESENT).length;
+      const late = attendances.filter(a => a.status === AttendanceStatus.LATE).length;
+      const onLeave = attendances.filter(a => a.status === AttendanceStatus.ON_LEAVE).length;
+      const absent = attendances.filter(a => a.status === AttendanceStatus.ABSENT).length;
+      const pending = totalEmployees - (present + late + onLeave + absent);
+      setStats({
+        totalEmployees,
+        present,
+        absent,
+        late,
+        onLeave,
+        pending
+      });
+    } catch (error) {
+      showNotification("Error loading stats", "error");
+    }
+  };
+
+  const handleStatClick = async (status: AttendanceStatus | 'ALL') => {
+    console.log('Filtering for status:', status);
+
+    try {
+      // Always load fresh attendances from the server
+      const latestAttendances: any = await attendanceService.getAllAttendances();
+
+      if (_.isEmpty(latestAttendances)) {
+        console.error('No attendances loaded:', latestAttendances);
+        setAttendances([]); // Clear attendances if none exist
+        return;
+      }
+
+      if (status === 'ALL') {
+        setAttendances(latestAttendances); // Show all attendances
+      } else {
+        const filteredAttendances = _.filter(latestAttendances, a => a.status === status);
+        console.log('Filtered attendances:', filteredAttendances);
+        setAttendances(filteredAttendances);
+      }
+    } catch (error) {
+      console.error('Error loading or filtering attendances:', error);
+      showNotification('Error loading attendances', 'error');
+    }
+  };
+
+
+
 
   const handleScanSuccess = async (employeeId: string) => {
     try {
@@ -216,8 +260,7 @@ const AttendancePage: React.FC = () => {
     { field: "employeeSurname", headerName: "Last Name", width: 150 },
     { field: "designation", headerName: "Designation", width: 150 },
     { field: "department", headerName: "Department", width: 150 },
-    { field: "contactNo", headerName: "Contact", width: 150 },
-    { field: "address", headerName: "Address", width: 350 },
+
     { field: "status", headerName: "Status", width: 150 },
     {
       field: "date",
@@ -246,10 +289,60 @@ const AttendancePage: React.FC = () => {
           <Typography variant="h4" className="header">
             Attendance Management
           </Typography>
+          <Grid container spacing={2} className="stat-cards">
+            <Grid item xs={12} sm={4} md={2} mb={5}>
+              <Card className="stat-card all" onClick={() => handleStatClick('ALL')}>
+                <CardContent>
+                  <Typography variant="h6">Total</Typography>
+                  <Typography variant="h4">{stats.totalEmployees}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4} md={2}>
+              <Card className="stat-card present" onClick={() => handleStatClick(AttendanceStatus.PRESENT)}>
+                <CardContent>
+                  <Typography variant="h6">Present</Typography>
+                  <Typography variant="h4">{stats.present}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4} md={2}>
+              <Card className="stat-card absent" onClick={() => handleStatClick(AttendanceStatus.ABSENT)}>
+                <CardContent>
+                  <Typography variant="h6">Absent</Typography>
+                  <Typography variant="h4">{stats.absent}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4} md={2}>
+              <Card className="stat-card late" onClick={() => handleStatClick(AttendanceStatus.LATE)}>
+                <CardContent>
+                  <Typography variant="h6">Late</Typography>
+                  <Typography variant="h4">{stats.late}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4} md={2}>
+              <Card className="stat-card on-leave" onClick={() => handleStatClick(AttendanceStatus.ON_LEAVE)}>
+                <CardContent>
+                  <Typography variant="h6">On Leave</Typography>
+                  <Typography variant="h4">{stats.onLeave}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4} md={2}>
+              <Card className="stat-card pending">
+                <CardContent>
+                  <Typography variant="h6">Pending</Typography>
+                  <Typography variant="h4">{stats.pending}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
 
           <Accordion className="accordion">
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Attendance Options</Typography>
+              <Typography>Mark Attendance</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Box className="tabs-container">
@@ -272,7 +365,7 @@ const AttendancePage: React.FC = () => {
               </Box>
             </AccordionDetails>
           </Accordion>
-          
+
           <Paper className="attendance-grid">
             <DataGrid
               rows={attendances}
@@ -294,7 +387,7 @@ const AttendancePage: React.FC = () => {
                   paginationModel: { pageSize: 10, page: 0 },
                 },
               }}
-              pageSizeOptions={[5, 10, 25,50,100]}
+              pageSizeOptions={[5, 10, 25, 50, 100]}
             />
           </Paper>
 
