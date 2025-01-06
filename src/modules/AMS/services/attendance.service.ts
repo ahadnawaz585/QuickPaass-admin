@@ -18,6 +18,8 @@ class AttendanceService extends BaseService {
       });
   }
 
+
+
   getTotalAttendances() {
     return axiosInstance
       .get<number>(`${this.baseUrl}/total`)

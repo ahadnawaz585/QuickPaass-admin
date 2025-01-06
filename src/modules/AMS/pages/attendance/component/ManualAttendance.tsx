@@ -49,7 +49,7 @@ const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const data = await service.getAllEmployees();
+      const data = await service.getAllFilterEmployees({ filter:true});
       setEmployees(data);
     } catch (error) {
       console.error('Error fetching employees:', error);

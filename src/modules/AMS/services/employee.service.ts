@@ -18,6 +18,17 @@ class EmployeeService extends BaseService {
       });
   }
 
+  getAllFilterEmployees(filterParams: { [key: string]: any }) {
+    return axiosInstance
+      .get<Employee[]>(`${this.baseUrl}/get`, { params: filterParams })
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error fetching all employees", error);
+        throw error;
+      });
+  }
+  
+
   getTotalEmployees() {
     return axiosInstance
       .get<number>(`${this.baseUrl}/total`)
@@ -165,14 +176,13 @@ class EmployeeService extends BaseService {
 
   generateExcel() {
     return axiosInstance
-       .get(`${this.baseUrl}/getExcel`, { responseType: 'blob' }) // Add responseType: 'blob'
-       .then((response) => response.data)
-       .catch((error) => {
-         console.error("Error generating Excel file:", error);
-         throw error;
-       });
- }
- 
+      .get(`${this.baseUrl}/getExcel`, { responseType: "blob" }) // Add responseType: 'blob'
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error generating Excel file:", error);
+        throw error;
+      });
+  }
 }
 
 export default EmployeeService;
