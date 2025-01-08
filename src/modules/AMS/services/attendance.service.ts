@@ -30,6 +30,26 @@ class AttendanceService extends BaseService {
       });
   }
 
+  getDatedAttendances(from:Date|null, to: Date|null) {
+    return axiosInstance
+      .post<any>(`${this.baseUrl}/getDate`, { from, to })
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error fetching Attendances", error);
+        throw error;
+      });
+  }
+
+  getEmployeeAttendances(employeeId:string,from:Date|null, to: Date|null) {
+    return axiosInstance
+      .post<any>(`${this.baseUrl}/getEmployeeAttendance`, {employeeId, from, to })
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error fetching Attendances", error);
+        throw error;
+      });
+  }
+
   getAttendances(page: number, pageSize: number) {
     return axiosInstance
       .post<paginatedData>(`${this.baseUrl}/get`, { page, pageSize })

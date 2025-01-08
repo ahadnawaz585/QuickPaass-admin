@@ -12,12 +12,10 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+import AttendanceDataGrid from "@/modules/AMS/components/Attendance/AttendanceDataGrid";
 import _ from 'lodash';
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { formatDate, formatTime, getCurrentTimeInPST } from "@/utils/date";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
-import dayjs from "dayjs";
 import QRScanner from "./component/QRScanner";
 import ManualAttendance from "./component/ManualAttendance";
 import AttendanceService from "../../services/attendance.service";
@@ -50,6 +48,7 @@ export interface Attendance {
 
 import { useRouter } from "next/navigation";
 import "./attendancePage.scss";
+import { convertToUTC } from "../../helper/date.helper";
 
 const attendanceService = new AttendanceService();
 const employeeService = new EmployeeService();
@@ -103,6 +102,7 @@ const AttendancePage: React.FC = () => {
     try {
       const data: any = await attendanceService.getAllAttendances();
       setAttendances(data);
+      await loadStats();
     } catch (error) {
       showNotification("Error loading attendances", "error");
     }
@@ -146,7 +146,7 @@ const AttendancePage: React.FC = () => {
         setAttendances(latestAttendances); // Show all attendances
       } else {
         const filteredAttendances = _.filter(latestAttendances, a => a.status === status);
-        console.log('Filtered attendances:', filteredAttendances);
+        // console.log('Filtered attendances:', filteredAttendances);
         setAttendances(filteredAttendances);
       }
     } catch (error) {
@@ -199,48 +199,92 @@ const AttendancePage: React.FC = () => {
     }
   };
 
+  const handleDateRangeChange = async (fromDate: Date | null, toDate: Date | null) => {
+    console.log("From Date:", fromDate);
+    console.log("To Date:", toDate);
+    // You can now filter the data or fetch data based on the date range
+    // Example: filter the attendances
+    // const filteredAttendances = attendances.filter((attendance) => {
+    //   const attendanceDate = new Date(attendance.date);
+    //   if (fromDate && attendanceDate < fromDate) return false;
+    //   if (toDate && attendanceDate > toDate) return false;
+    //   return true;
+    // });
+    if (fromDate || toDate) {
+      const filtered = await attendanceService.getDatedAttendances(fromDate, toDate);
+      setAttendances(filtered);
+      showNotification("Filtered Attendance fetched", "success");
+    } else{
+      loadAttendances();
+    }
+  };
+
   const handleManualAttendance = async (
     employeeId: string,
     status: AttendanceStatus,
     date: Date
   ) => {
     try {
-      // Call the checkAttendance API to check current attendance status
+      // Validate input date
+      if (!(date instanceof Date)) {
+        showNotification("Invalid date provided for attendance", "error");
+        return;
+      }
+
+      // Check attendance status via API
       const response = await attendanceService.checkAttendance(employeeId, status);
       const { success, message }: any = response.data;
 
       if (success) {
-        // Show dialog with the current attendance status before marking
+        // Show confirmation dialog
         setDialogProps({
           open: true,
           heading: "Confirm Attendance",
           question: `${message}`,
-          onClose: async (confirm) => {
+          onClose: async (confirm: boolean) => {
             setDialogProps({ ...dialogProps, open: false });
             if (confirm) {
-              const employee = await employeeService.getEmployeeById(employeeId);
-              if (employee) {
-                const attendance: any = {
+              try {
+                // Fetch employee details
+                // const employee = await employeeService.getEmployeeById(employeeId);
+                // if (employee) {
+                // Prepare attendance object
+                const attendance = {
                   employeeId,
-                  date,
+                  date: convertToUTC(date),
                   status,
-                  checkIn: status === AttendanceStatus.PRESENT ? date : null,
+                  checkIn: status === AttendanceStatus.PRESENT ? convertToUTC(date) : null,
                   checkOut: null,
                   location: "",
                 };
+
+                console.log("Attendance to mark:", attendance);
+
+                // Mark attendance via API
                 await attendanceService.markAttendance(attendance);
+
+                // Notify user of success and reload data
                 showNotification("Attendance marked successfully", "success");
                 loadAttendances();
+                // } else {
+                //   showNotification("Employee not found", "error");
+                // }
+              } catch (markError) {
+                console.error("Error marking attendance:", markError);
+                showNotification("Failed to mark attendance", "error");
               }
             }
           },
         });
+      } else {
+        showNotification(message || "Attendance check failed", "error");
       }
-
     } catch (error) {
+      console.error("Error handling manual attendance:", error);
       showNotification("Error marking attendance", "error");
     }
   };
+
 
   const showNotification = (
     message: string,
@@ -253,34 +297,6 @@ const AttendancePage: React.FC = () => {
     const selectedAttendance = params.row;
     router.push(`/admin/ams/employee/${selectedAttendance.employeeId}`);
   };
-
-  const columns: GridColDef[] = [
-    { field: "code", headerName: "Employee Code", width: 180 },
-    { field: "employeeName", headerName: "First Name", width: 150 },
-    { field: "employeeSurname", headerName: "Last Name", width: 150 },
-    { field: "designation", headerName: "Designation", width: 150 },
-    { field: "department", headerName: "Department", width: 150 },
-
-    { field: "status", headerName: "Status", width: 150 },
-    {
-      field: "date",
-      headerName: "Date",
-      width: 130,
-      renderCell: (params) => formatDate(params.value),
-    },
-    {
-      field: "checkIn",
-      headerName: "Check In",
-      width: 130,
-      renderCell: (params) => formatTime(params.value),
-    },
-    {
-      field: "checkOut",
-      headerName: "Check Out",
-      width: 130,
-      renderCell: (params) => formatTime(params.value),
-    },
-  ];
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -340,7 +356,9 @@ const AttendancePage: React.FC = () => {
             </Grid>
           </Grid>
 
-          <Accordion className="accordion">
+          <Accordion className="accordion"  
+           aria-controls="panel1a-content"
+          id="panel1a-header"> 
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography>Mark Attendance</Typography>
             </AccordionSummary>
@@ -367,28 +385,7 @@ const AttendancePage: React.FC = () => {
           </Accordion>
 
           <Paper className="attendance-grid">
-            <DataGrid
-              rows={attendances}
-              columns={columns}
-              onRowClick={handleRowClick}
-              slotProps={{
-                loadingOverlay: {
-                  variant: 'skeleton',
-                  noRowsVariant: 'skeleton',
-                },
-              }}
-              checkboxSelection
-              keepNonExistentRowsSelected
-              slots={{ toolbar: GridToolbar }}
-              autoHeight
-              initialState={{
-                density: 'compact',
-                pagination: {
-                  paginationModel: { pageSize: 10, page: 0 },
-                },
-              }}
-              pageSizeOptions={[5, 10, 25, 50, 100]}
-            />
+            <AttendanceDataGrid onDateRangeChange={handleDateRangeChange} onRowClick={handleRowClick} attendances={attendances} />
           </Paper>
 
           <Snackbar
