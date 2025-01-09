@@ -80,9 +80,9 @@ class AttendanceService extends BaseService {
   }
 
 
-  checkAttendance(employeeId:string,status:AttendanceStatus){
+  checkAttendance(employeeId:string,status:AttendanceStatus,date:Date){
     return axiosInstance
-    .post<void>(`${this.baseUrl}/checkAttendance`, {employeeId,status})
+    .post<void>(`${this.baseUrl}/checkAttendance`, {employeeId,status,date})
     .catch((error) => {
       console.error("Error checking Attendance", error);
       throw error;

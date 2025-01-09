@@ -161,7 +161,7 @@ const AttendancePage: React.FC = () => {
   const handleScanSuccess = async (employeeId: string) => {
     try {
       // Call the checkAttendance API to get attendance status
-      const response = await attendanceService.checkAttendance(employeeId, AttendanceStatus.PRESENT);
+      const response = await attendanceService.checkAttendance(employeeId, AttendanceStatus.PRESENT, new Date());
       const { success, message }: any = response.data;
 
       if (success) {
@@ -232,7 +232,7 @@ const AttendancePage: React.FC = () => {
       }
 
       // Check attendance status via API
-      const response = await attendanceService.checkAttendance(employeeId, status);
+      const response = await attendanceService.checkAttendance(employeeId, status,date);
       const { success, message }: any = response.data;
 
       if (success) {
