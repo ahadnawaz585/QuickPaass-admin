@@ -26,7 +26,7 @@ import AttendanceService from "@/modules/AMS/services/attendance.service";
 import AttendanceDataGrid, { Attendance } from "../../../Attendance/AttendanceDataGrid";
 import { AttendanceStatus } from "@/modules/AMS/pages/attendance/attendance";
 import '../../styles/AttendanceTab.scss';
-
+import { useRouter, useParams } from 'next/navigation';
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -43,7 +43,8 @@ const AttendanceTab = () => {
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [filteredAttendances, setFilteredAttendances] = useState<Attendance[]>([]);
   const [activeFilter, setActiveFilter] = useState<AttendanceStatus | null>(null);
-  const [employeeId, setEmployeeId] = useState<string>("");
+      const { id }: any = useParams();
+      const employeeId: string = Array.isArray(id) ? id[0] : id;
   const [loading, setLoading] = useState<boolean>(true);
   const service = new AttendanceService();
 
@@ -126,6 +127,7 @@ const AttendanceTab = () => {
   };
 
   useEffect(() => {
+    console.log(employeeId);
     fetchAttendances(null, null);
   }, [employeeId]);
 
