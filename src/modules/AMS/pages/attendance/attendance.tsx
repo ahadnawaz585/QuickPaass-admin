@@ -232,7 +232,7 @@ const AttendancePage: React.FC = () => {
       }
 
       // Check attendance status via API
-      const response = await attendanceService.checkAttendance(employeeId, status,date);
+      const response = await attendanceService.checkAttendance(employeeId, status,convertToUTC(date));
       const { success, message }: any = response.data;
 
       if (success) {
