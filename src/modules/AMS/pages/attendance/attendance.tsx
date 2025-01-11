@@ -248,7 +248,7 @@ const AttendancePage: React.FC = () => {
                 employeeId,
                 date: utcDate,
                 status,
-                checkIn: status === AttendanceStatus.PRESENT ? date : null,
+                checkIn: status === AttendanceStatus.PRESENT ? utcDate : null,
                 checkOut: null,
                 location: "",
               };
