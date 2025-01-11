@@ -234,7 +234,7 @@ const AttendancePage: React.FC = () => {
       const utcDate = convertToUTC(date);
   
       // Call the API
-      const response = await attendanceService.checkAttendance(employeeId, status, date);
+      const response = await attendanceService.checkAttendance(employeeId, status, utcDate);
       const { success, message }: any = response.data;
   
       if (success) {
@@ -247,7 +247,7 @@ const AttendancePage: React.FC = () => {
             if (confirm) {
               const attendance = {
                 employeeId,
-                date: date,
+                date: utcDate,
                 status,
                 checkIn: status === AttendanceStatus.PRESENT ? utcDate : null,
                 checkOut: null,
