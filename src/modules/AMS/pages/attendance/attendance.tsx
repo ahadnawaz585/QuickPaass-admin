@@ -88,6 +88,7 @@ const AttendancePage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       await loadAttendances();
+
     };
 
     fetchData();
@@ -199,8 +200,8 @@ const AttendancePage: React.FC = () => {
   };
 
   const handleDateRangeChange = async (fromDate: Date | null, toDate: Date | null) => {
-    const utcFromDate = fromDate ? convertToUTC(fromDate) : null;
-    const utcToDate = toDate ? convertToUTC(toDate) : null;
+    console.log("From Date:", fromDate);
+    console.log("To Date:", toDate);
     // You can now filter the data or fetch data based on the date range
     // Example: filter the attendances
     // const filteredAttendances = attendances.filter((attendance) => {
@@ -210,7 +211,7 @@ const AttendancePage: React.FC = () => {
     //   return true;
     // });
     if (fromDate || toDate) {
-      const filtered = await attendanceService.getDatedAttendances(utcFromDate, utcToDate);
+      const filtered = await attendanceService.getDatedAttendances(fromDate, toDate);
       setAttendances(filtered);
       showNotification("Filtered Attendance fetched", "success");
     } else{
@@ -224,20 +225,18 @@ const AttendancePage: React.FC = () => {
     date: Date
   ) => {
     try {
+      // Validate input date
       if (!(date instanceof Date)) {
         showNotification("Invalid date provided for attendance", "error");
         return;
       }
-  
-      // Convert to UTC
-      const utcDate = convertToUTC(date);  // Assure convertToUTC function handles the conversion properly.
-      // const utcDate = date;  // Assure convertToUTC function handles the conversion properly.
-      
-      // Call the API
-      const response = await attendanceService.checkAttendance(employeeId, status, utcDate);
+
+      // Check attendance status via API
+      const response = await attendanceService.checkAttendance(employeeId, status,convertToUTC(date));
       const { success, message }: any = response.data;
-  
+
       if (success) {
+        // Show confirmation dialog
         setDialogProps({
           open: true,
           heading: "Confirm Attendance",
@@ -245,18 +244,35 @@ const AttendancePage: React.FC = () => {
           onClose: async (confirm: boolean) => {
             setDialogProps({ ...dialogProps, open: false });
             if (confirm) {
-              const attendance = {
-                employeeId,
-                date: utcDate,
-                status,
-                checkIn: status === AttendanceStatus.PRESENT ? utcDate : null,
-                checkOut: null,
-                location: "",
-              };
-  
-              await attendanceService.markAttendance(attendance);
-              showNotification("Attendance marked successfully", "success");
-              loadAttendances();
+              try {
+                // Fetch employee details
+                // const employee = await employeeService.getEmployeeById(employeeId);
+                // if (employee) {
+                // Prepare attendance object
+                const attendance = {
+                  employeeId,
+                  date: convertToUTC(date),
+                  status,
+                  checkIn: status === AttendanceStatus.PRESENT ? convertToUTC(date) : null,
+                  checkOut: null,
+                  location: "",
+                };
+
+                console.log("Attendance to mark:", attendance);
+
+                // Mark attendance via API
+                await attendanceService.markAttendance(attendance);
+
+                // Notify user of success and reload data
+                showNotification("Attendance marked successfully", "success");
+                loadAttendances();
+                // } else {
+                //   showNotification("Employee not found", "error");
+                // }
+              } catch (markError) {
+                console.error("Error marking attendance:", markError);
+                showNotification("Failed to mark attendance", "error");
+              }
             }
           },
         });
@@ -268,8 +284,6 @@ const AttendancePage: React.FC = () => {
       showNotification("Error marking attendance", "error");
     }
   };
-  
-
 
 
   const showNotification = (
