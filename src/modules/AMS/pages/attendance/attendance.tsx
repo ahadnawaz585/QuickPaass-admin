@@ -230,8 +230,8 @@ const AttendancePage: React.FC = () => {
       }
   
       // Convert to UTC
-      // const utcDate = convertToUTC(date);  // Assure convertToUTC function handles the conversion properly.
-      const utcDate = date;  // Assure convertToUTC function handles the conversion properly.
+      const utcDate = convertToUTC(date);  // Assure convertToUTC function handles the conversion properly.
+      // const utcDate = date;  // Assure convertToUTC function handles the conversion properly.
       
       // Call the API
       const response = await attendanceService.checkAttendance(employeeId, status, utcDate);
