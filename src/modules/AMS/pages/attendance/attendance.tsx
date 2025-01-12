@@ -49,6 +49,7 @@ export interface Attendance {
 import { useRouter } from "next/navigation";
 import "./attendancePage.scss";
 import { convertToUTC } from "../../helper/date.helper";
+import PhysicalScanner from "./component/PhysicalScanner";
 
 const attendanceService = new AttendanceService();
 const employeeService = new EmployeeService();
@@ -214,7 +215,7 @@ const AttendancePage: React.FC = () => {
       const filtered = await attendanceService.getDatedAttendances(fromDate, toDate);
       setAttendances(filtered);
       showNotification("Filtered Attendance fetched", "success");
-    } else{
+    } else {
       loadAttendances();
     }
   };
@@ -232,7 +233,7 @@ const AttendancePage: React.FC = () => {
       }
 
       // Check attendance status via API
-      const response = await attendanceService.checkAttendance(employeeId, status,convertToUTC(date));
+      const response = await attendanceService.checkAttendance(employeeId, status, convertToUTC(date));
       const { success, message }: any = response.data;
 
       if (success) {
@@ -356,9 +357,9 @@ const AttendancePage: React.FC = () => {
             </Grid>
           </Grid>
 
-          <Accordion className="accordion"  
-           aria-controls="panel1a-content"
-          id="panel1a-header"> 
+          <Accordion className="accordion"
+            aria-controls="panel1a-content"
+            id="panel1a-header">
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography>Mark Attendance</Typography>
             </AccordionSummary>
@@ -370,17 +371,21 @@ const AttendancePage: React.FC = () => {
                   indicatorColor="primary"
                   textColor="primary"
                 >
+                  <Tab label="Physical Scanner" /> {/* New tab added here */}
                   <Tab label="QR Scanner" />
                   <Tab label="Manual Entry" />
                 </Tabs>
                 <Box p={3}>
                   {activeTab === 0 ? (
+                    <PhysicalScanner />
+                  ) : activeTab === 1 ? (
                     <QRScanner onScanSuccess={handleScanSuccess} />
                   ) : (
                     <ManualAttendance onSubmit={handleManualAttendance} />
                   )}
                 </Box>
               </Box>
+
             </AccordionDetails>
           </Accordion>
 
