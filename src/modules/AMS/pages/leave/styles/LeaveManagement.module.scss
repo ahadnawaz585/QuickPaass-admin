@@ -1,0 +1,43 @@
+// Common styles
+.container {
+    padding: 24px;
+    
+    .header {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  
+      h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #1976d2;
+      }
+    }
+  
+    .dataGridContainer {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      height: calc(100vh - 200px);
+      min-height: 400px;
+    }
+  
+    .formContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px 0;
+      
+      .dateFields {
+        display: flex;
+        gap: 16px;
+        margin: 16px 0;
+        
+        .dateField {
+          flex: 1;
+        }
+      }
+    }
+  }

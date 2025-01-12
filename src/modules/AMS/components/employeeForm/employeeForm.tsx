@@ -221,11 +221,11 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({ employee, onSubmit, onDisca
                         <Grid item xs={12} md={4}>
 
                             <DatePicker
-                                views={['day', 'month', 'year']}
                                 label="Date of Birth"
                                 value={formData.dob}
                                 onChange={handleDateChange("dob")}
                                 //    inputFormat="dd.MM.yyyy"
+                                views={['day', 'month', 'year']}
                                 format="DD/MM/YYYY"
                                 slotProps={{
                                     textField: { fullWidth: true, required: true },
