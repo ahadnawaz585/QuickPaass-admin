@@ -20,7 +20,7 @@ const PhysicalScanner: React.FC = () => {
     //   return;
     // }
 
-    const isChromium = window?.chrome;
+    const isChromium = true;
     const isEdge = navigator.userAgent.indexOf('Edg') !== -1;
 
     if (!isChromium && !isEdge) {
