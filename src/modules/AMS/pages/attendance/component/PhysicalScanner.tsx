@@ -1,86 +1,118 @@
-"use client";
+'use client'
 
-import React, { useState } from 'react';
-import { Box, Typography, CircularProgress, Alert, Button } from '@mui/material';
-import { QrCode } from '@mui/icons-material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Typography, CircularProgress, Alert, Button, Snackbar } from '@mui/material';
+import { QrCode, CheckCircleOutline } from '@mui/icons-material';
 import styles from './PhysicalScanner.module.scss';
-
-interface ScannerDevice {
-  deviceId: string;
-  label: string;
-}
 
 const PhysicalScanner: React.FC = () => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [scannedCode, setScannedCode] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
+  const [browserSupported, setBrowserSupported] = useState<boolean>(true);
+  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState<boolean>(false);
+
+  const checkSupport = useCallback(() => {
+    // if (!window.isSecureContext) {
+    //   setBrowserSupported(false);
+    //   setError('WebUSB requires a secure context (HTTPS or localhost). Your app is running on HTTP.');
+    //   return;
+    // }
+
+    const isChromium = window?.chrome;
+    const isEdge = navigator.userAgent.indexOf('Edg') !== -1;
+
+    if (!isChromium && !isEdge) {
+      setBrowserSupported(false);
+      setError('WebUSB is only supported in Chrome and Edge browsers.');
+      return;
+    }
+
+    if (!('usb' in navigator)) {
+      setBrowserSupported(false);
+      setError('WebUSB is not supported in this browser.');
+      return;
+    }
+  }, []);
+
+  useEffect(() => {
+    checkSupport();
+  }, [checkSupport]);
 
   const connectScanner = async () => {
+    if (!browserSupported) return;
+
     setIsInitializing(true);
     setError('');
 
     try {
-        // const device = await navigator.usb.requestDevice({ 
-
-        //     filters: [{ vendorId: 0x0424, productId: 0xEC00 }] // Example filter for a specific device
-      
-        //   });
-      
-      
-      
-        //   const deviceList = document.getElementById('deviceList');
-      
-        //   const listItem = document.createElement('li');
-      
-        //   listItem.textContent = `Product Name: ${device.productName}, Vendor ID: ${device.vendorId}`;
-      
-        //   deviceList?.appendChild(listItem);
-          
-      if (!('usb' in navigator)) {
-        throw new Error('WebUSB is not supported in this browser.');
-      }
-
       const device = await (navigator as any).usb.requestDevice({
-        // filters: [{ vendorId: 0x0483, productId: 0x5740 }]
-        filters: []
+        filters: [{ vendorId: 0x04f2, productId: 0xb725 }],
       });
-
-      console.log(await device);
 
       await device.open();
       await device.selectConfiguration(1);
       await device.claimInterface(0);
 
-      device.addEventListener('inputreport', (event: any) => {
-        const data = new TextDecoder().decode(event.data);
-        setScannedCode(data.trim());
-      });
-
-      (navigator as any).usb.addEventListener('disconnect', (event: any) => {
-        if (event.device === device) {
-          setIsConnected(false);
-          setError('Scanner disconnected. Please reconnect the device.');
-        }
-      });
+      device.addEventListener('inputreport', handleScannerInput);
+      (navigator as any).usb.addEventListener('disconnect', handleDisconnect);
 
       setIsConnected(true);
       setError('');
+      setShowSuccessSnackbar(true);
     } catch (err) {
-      if (err instanceof Error) {
-        if (err.name === 'NotFoundError') {
-          setError('No compatible scanner selected. Please try again.');
-        } else {
-          setError(`Failed to initialize scanner: ${err.message}`);
-        }
-      } else {
-        setError('An unknown error occurred');
-      }
-      setIsConnected(false);
+      handleError(err);
     } finally {
       setIsInitializing(false);
     }
   };
+
+  const handleScannerInput = (event: any) => {
+    try {
+      const data = new TextDecoder().decode(event.data);
+      setScannedCode(data.trim());
+    } catch (err) {
+      console.error('Error decoding scanner data:', err);
+    }
+  };
+
+  const handleDisconnect = () => {
+    setIsConnected(false);
+    setError('Scanner disconnected. Please reconnect the device.');
+  };
+
+  const handleError = (err: unknown) => {
+    if (err instanceof Error) {
+      if (err.name === 'NotFoundError') {
+        setError('No compatible scanner selected. Please try again.');
+      } else if (err.name === 'SecurityError') {
+        setError('Access to USB devices was denied. Please try again and grant permission.');
+      } else {
+        setError(`Failed to initialize scanner: ${err.message}`);
+      }
+    } else {
+      setError('An unknown error occurred.');
+    }
+    setIsConnected(false);
+  };
+
+  if (!browserSupported) {
+    return (
+      <Box className={styles.scannerContainer}>
+        <Typography variant="h5" component="h2" className={styles.title}>
+          <QrCode className={styles.icon} />
+          Barcode Scanner
+        </Typography>
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            Please use Chrome or Edge browser with HTTPS to access the scanner.
+          </Typography>
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box className={styles.scannerContainer}>
@@ -131,8 +163,22 @@ const PhysicalScanner: React.FC = () => {
           </Box>
         </>
       )}
+
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        open={showSuccessSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccessSnackbar(false)}
+        message={
+          <Box display="flex" alignItems="center">
+            <CheckCircleOutline sx={{ mr: 1 }} />
+            Scanner connected successfully
+          </Box>
+        }
+      />
     </Box>
   );
 };
 
 export default PhysicalScanner;
+

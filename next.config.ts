@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
           hostname: 'localhost',
           pathname: '**',
         },
+        {
+          protocol: 'https',
+          hostname: 'solarmax.com.pk',
+          pathname: '**',
+        },
       ],
     // domains: ['localhost'],
 },

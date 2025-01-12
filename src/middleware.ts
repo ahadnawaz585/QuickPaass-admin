@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
   };
 
   if (pathname === "" ||pathname ==="/") {
-    const analyticsUrl = `${request.nextUrl.origin}/analytics`;
+    const analyticsUrl = `${request.nextUrl.origin}/testing/admin/analytics`;
     return NextResponse.redirect(analyticsUrl);
   }
 
@@ -27,26 +27,26 @@ export async function middleware(request: NextRequest) {
   };
 
   const redirectToLogin = (redirectPath: string) => {
-    const loginUrl = `${request.nextUrl.origin}${
+    const loginUrl = `${request.nextUrl.origin}/testing/${
       ROUTES.login
     }?redirect=${encodeURIComponent(redirectPath)}`;
     return NextResponse.redirect(loginUrl);
   };
 
   const redirectToHome = () => {
-    const homeUrl = `${request.nextUrl.origin}${ROUTES.home}`;
+    const homeUrl = `${request.nextUrl.origin}/testing/${ROUTES.home}`;
     return NextResponse.redirect(homeUrl);
   };
 
   if (requiresAuth(pathname)) {
     if (!isAuthenticated()) {
       redirectTo = pathname;
-      return redirectToLogin(`/admin/${redirectTo}`);
+      return redirectToLogin(`/testing/admin/${redirectTo}`);
     }
   }
 
   if (isAuthenticated()) {
-    if (pathname === "/admin/login") {
+    if (pathname === "/testing/admin/login" || pathname === "/admin/login") {
       return redirectToHome();
     }
   }
@@ -55,7 +55,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|assets|favicon.ico|logo.png|sw.js).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|assets|favicon.ico|logo.png|sw.js).*)',
+  ],
 }
 
 // export const config = {
