@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Typography, CircularProgress, Alert, Button, Snackbar } from '@mui/material';
 import { QrCode, CheckCircleOutline } from '@mui/icons-material';
@@ -12,26 +10,12 @@ const PhysicalScanner: React.FC = () => {
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [browserSupported, setBrowserSupported] = useState<boolean>(true);
   const [showSuccessSnackbar, setShowSuccessSnackbar] = useState<boolean>(false);
+  const [device, setDevice] = useState<HIDDevice | null>(null);
 
   const checkSupport = useCallback(() => {
-    // if (!window.isSecureContext) {
-    //   setBrowserSupported(false);
-    //   setError('WebUSB requires a secure context (HTTPS or localhost). Your app is running on HTTP.');
-    //   return;
-    // }
-
-    const isChromium = true;
-    const isEdge = navigator.userAgent.indexOf('Edg') !== -1;
-
-    if (!isChromium && !isEdge) {
+    if (!('hid' in navigator)) {
       setBrowserSupported(false);
-      setError('WebUSB is only supported in Chrome and Edge browsers.');
-      return;
-    }
-
-    if (!('usb' in navigator)) {
-      setBrowserSupported(false);
-      setError('WebUSB is not supported in this browser.');
+      setError('WebHID is not supported in this browser.');
       return;
     }
   }, []);
@@ -42,60 +26,94 @@ const PhysicalScanner: React.FC = () => {
 
   const connectScanner = async () => {
     if (!browserSupported) return;
-
+  
     setIsInitializing(true);
     setError('');
-
+  
     try {
-      const device = await (navigator as any).usb.requestDevice({
-        filters: [{ vendorId: 0x04f2, productId: 0xb725 }],
+      const devices = await navigator.hid.requestDevice({
+        filters: [{ vendorId: 7554, productId: 23712 }],
       });
-
+  
+      if (devices.length === 0) {
+        throw new Error('No device selected.');
+      }
+  
+      const device:any = devices[0];
+      console.log('Selected Device:', device);
       await device.open();
-      await device.selectConfiguration(1);
-      await device.claimInterface(0);
-
-      device.addEventListener('inputreport', handleScannerInput);
-      (navigator as any).usb.addEventListener('disconnect', handleDisconnect);
-
+        console.log("hello")
+      device.oninputreport = (event:any) => {
+        console.log('Input report received:', event);
+        const { data, reportId } = event;
+        console.log('Report ID:', reportId);
+        console.log('Raw Data (Uint8Array):', new Uint8Array(data.buffer));
+  
+        if (data) {
+          try {
+            const textDecoder = new TextDecoder();
+            const scannedData = textDecoder.decode(data);
+            console.log('Decoded Data:', scannedData);
+            setScannedCode(scannedData.trim());
+          } catch (err) {
+            console.error('Error decoding data:', err);
+            setError('Failed to decode scanned data.');
+          }
+        }
+      };
+      console.log("bye")
+      setDevice(device);
       setIsConnected(true);
-      setError('');
       setShowSuccessSnackbar(true);
+      setError('');
     } catch (err) {
       handleError(err);
     } finally {
       setIsInitializing(false);
     }
   };
-
-  const handleScannerInput = (event: any) => {
-    try {
-      const data = new TextDecoder().decode(event.data);
-      setScannedCode(data.trim());
-    } catch (err) {
-      console.error('Error decoding scanner data:', err);
-    }
-  };
-
-  const handleDisconnect = () => {
-    setIsConnected(false);
-    setError('Scanner disconnected. Please reconnect the device.');
-  };
+  
 
   const handleError = (err: unknown) => {
+    console.error('Error occurred:', err);
     if (err instanceof Error) {
       if (err.name === 'NotFoundError') {
         setError('No compatible scanner selected. Please try again.');
       } else if (err.name === 'SecurityError') {
-        setError('Access to USB devices was denied. Please try again and grant permission.');
+        setError('Access to HID devices was denied. Please try again and grant permission.');
+      } else if (err.name === 'NotAllowedError') {
+        setError('Permission denied. Please ensure you grant access to the HID device.');
       } else {
         setError(`Failed to initialize scanner: ${err.message}`);
+
       }
     } else {
       setError('An unknown error occurred.');
     }
     setIsConnected(false);
+    setDevice(null);
   };
+
+  const handleDisconnect = useCallback(
+    (e: HIDConnectionEvent) => {
+      if (e.device === device) {
+        setIsConnected(false);
+        setDevice(null);
+        setError('Scanner disconnected. Please reconnect the device.');
+      }
+    },
+    [device]
+  );
+
+  useEffect(() => {
+    navigator.hid.addEventListener('disconnect', handleDisconnect);
+    return () => {
+      if (device) {
+        device.close().catch(console.error);
+      }
+      navigator.hid.removeEventListener('disconnect', handleDisconnect);
+    };
+  }, [device, handleDisconnect]);
 
   if (!browserSupported) {
     return (
@@ -107,7 +125,7 @@ const PhysicalScanner: React.FC = () => {
         <Alert severity="error" sx={{ mt: 2 }}>
           {error}
           <Typography variant="body2" sx={{ mt: 1 }}>
-            Please use Chrome or Edge browser with HTTPS to access the scanner.
+            Please use a browser that supports WebHID.
           </Typography>
         </Alert>
       </Box>
@@ -139,7 +157,7 @@ const PhysicalScanner: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Box className={`${styles.scannerStatus} ${isConnected ? styles.connected : styles.disconnected}`}>
+         <Box className={`${styles.scannerStatus} ${isConnected ? styles.connected : styles.disconnected}`}>
             <Typography variant="body1">
               Status: {isConnected ? 'Connected' : 'Disconnected'}
             </Typography>
@@ -181,4 +199,3 @@ const PhysicalScanner: React.FC = () => {
 };
 
 export default PhysicalScanner;
-
