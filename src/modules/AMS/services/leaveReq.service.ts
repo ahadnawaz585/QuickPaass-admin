@@ -2,7 +2,7 @@ import { axiosInstance } from "@/utils/header";
 import { BaseService } from "@/utils/base.service";
 import { paginatedData } from "@/types/paginatedData";
 import { environment } from "@/environment/environment";
-import { LeaveRequest } from "@/types/AMS/leave";
+import { LeaveRequest, LeaveStatus } from "@/types/AMS/leave";
 
 class LeaveReqService extends BaseService {
   private baseUrl = environment.apiUrl + "/leave/leave-requests";
@@ -36,6 +36,18 @@ class LeaveReqService extends BaseService {
         throw error;
       });
   }
+
+  updateLeaveRequestStatus(id: string,status:LeaveStatus) {
+    return axiosInstance
+      .post<LeaveRequest[]>(`${this.baseUrl}/updateStatus`, { id, status})
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error fetching leave requests by employee ID", error);
+        throw error;
+      });
+  }
+
+
 
   createLeaveRequest(leaveRequestData: LeaveRequest) {
     return axiosInstance

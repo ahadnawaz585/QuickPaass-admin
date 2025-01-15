@@ -159,7 +159,6 @@ const TableComponent: FC<TableComponentProps> = ({
         paginationMode="server"
         rowCount={totalSize}
         checkboxSelection
-
         initialState={{
           density: 'compact',
           pagination: {
@@ -177,7 +176,10 @@ const TableComponent: FC<TableComponentProps> = ({
         getRowClassName={(params) =>
           params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'even'
         }
-        slotProps={{
+        slotProps={{ toolbar: {
+          showQuickFilter: true,
+          quickFilterProps: { debounceMs: 500 },
+      },
           loadingOverlay: {
             variant: 'skeleton',
             noRowsVariant: 'skeleton',

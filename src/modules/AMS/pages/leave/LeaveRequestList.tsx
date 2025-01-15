@@ -164,11 +164,8 @@ export const LeaveRequestList = () => {
 
     const handleStatusChange = async (id: string, status: LeaveStatus) => {
         try {
-            const request = requests.find(r => r.id === id);
-            if (request) {
-                await leaveReqService.updateLeaveRequest(id, { ...request, status });
+                await leaveReqService.updateLeaveRequestStatus(id,status);
                 loadData();
-            }
         } catch (error) {
             console.error('Error updating status:', error);
         }
@@ -285,10 +282,12 @@ export const LeaveRequestList = () => {
                         rows={requests}
                         columns={columns}
                         loading={loading}
+                        
                         initialState={{
                             pagination: {
                                 paginationModel: { pageSize: 10 },
                             },
+                            density: "compact",
                             sorting: {
                                 sortModel: [{ field: 'startDate', sort: 'desc' }],
                             },

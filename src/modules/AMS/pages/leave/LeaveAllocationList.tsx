@@ -117,6 +117,7 @@ export const LeaveAllocationList = () => {
     const handleSubmit = async () => {
         try {
             if (editId) {
+                console.log(editId);
                 await leaveAllocService.updateLeaveAllocation(editId, formData as LeaveAllocation);
             } else {
                 await leaveAllocService.createLeaveAllocation(formData as LeaveAllocation);
@@ -223,6 +224,7 @@ export const LeaveAllocationList = () => {
                             pagination: {
                                 paginationModel: { pageSize: 10 },
                             },
+                            density: "compact",
                             sorting: {
                                 sortModel: [{ field: 'allocationStartDate', sort: 'desc' }],
                             },

@@ -22,11 +22,15 @@ const CustomPageSizeSelector: React.FC<CustomPageSizeSelectorProps> = ({
   const [customValue, setCustomValue] = useState<string | number>("");
 
   const handleCustomValueSubmit = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter" && customValue) {
-      const newSize = Number(customValue);
-      if (!isNaN(newSize) && newSize > 0) {
-        onPageSizeChange(newSize);
-        setCustomValue(""); // Reset the input field
+    if (Number(customValue) > 100) {
+      alert((" value should be less than 100"));
+    } else {
+      if (e.key === "Enter" && customValue) {
+        const newSize = Number(customValue);
+        if (!isNaN(newSize) && newSize > 0) {
+          onPageSizeChange(newSize);
+          setCustomValue(""); // Reset the input field
+        }
       }
     }
   };

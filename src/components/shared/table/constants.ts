@@ -4,4 +4,4 @@ export let NON_DELETEABLE_IDS = [
     "2d9c89e7-466d-4b1c-b1b3-3ef5be815ed4"
   ] ;
   
-  export const PAGE_SIZE_OPTIONS = [5, 15, 25, 50];
+  export const PAGE_SIZE_OPTIONS = [5, 15, 25, 50,100];

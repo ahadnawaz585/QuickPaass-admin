@@ -166,6 +166,7 @@ export const LeaveConfigList = () => {
             pagination: {
               paginationModel: { pageSize: 10 },
             },
+            density: "compact",
           }}
           pageSizeOptions={[5, 10, 25, 50]}
           slots={{ toolbar: GridToolbar }}

@@ -172,6 +172,10 @@ const AttendanceDataGrid: React.FC<AttendanceDataGridProps> = ({
               variant: "skeleton",
               noRowsVariant: "skeleton",
             },
+            toolbar: {
+              showQuickFilter: true,
+              quickFilterProps: { debounceMs: 500 },
+          },
           }}
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
