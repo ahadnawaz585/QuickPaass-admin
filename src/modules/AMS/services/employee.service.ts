@@ -59,6 +59,16 @@ class EmployeeService extends BaseService {
       });
   }
 
+  getEmployeeByCode(code: string) {
+    return axiosInstance
+      .post<Employee>(`${this.baseUrl}/getByCode`, { code })
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error fetching employee by ID", error);
+        throw error;
+      });
+  }
+
   createEmployee(employeeData: Employee) {
     return axiosInstance
       .post<void>(`${this.baseUrl}/create`, employeeData)

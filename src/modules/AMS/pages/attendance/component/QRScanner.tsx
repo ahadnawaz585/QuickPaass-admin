@@ -18,7 +18,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ onScanSuccess }) => {
 
     scannerRef.current.render(
       (decodedText) => {
-        console.log(decodedText);
+        // console.log(decodedText);
         onScanSuccess(decodedText);
       },
       (error) => {

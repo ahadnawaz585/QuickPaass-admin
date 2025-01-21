@@ -53,6 +53,13 @@ import PhysicalScanner from "./component/PhysicalScanner";
 
 const attendanceService = new AttendanceService();
 const employeeService = new EmployeeService();
+import dayjs, { Dayjs } from 'dayjs';
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+// Extend Day.js with plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type NotificationType = {
   open: boolean;
@@ -69,7 +76,7 @@ const AttendancePage: React.FC = () => {
     message: "",
     severity: "success",
   });
-
+  const [dateTime, setDateTime] = useState<Dayjs>(dayjs().tz("Asia/Karachi"));
   const [dialogProps, setDialogProps] = useState({
     open: false,
     heading: "",
@@ -163,7 +170,8 @@ const AttendancePage: React.FC = () => {
     try {
       // Call the checkAttendance API to get attendance status
       const response = await attendanceService.checkAttendance(employeeId, AttendanceStatus.PRESENT, new Date());
-      const { success, message }: any = response.data;
+      const { success, message, status }: any = response.data;
+      const date = dateTime.toDate();
 
       if (success) {
         // Show dialog with attendance status
@@ -174,20 +182,16 @@ const AttendancePage: React.FC = () => {
           onClose: async (confirm) => {
             setDialogProps({ ...dialogProps, open: false });
             if (confirm) {
-              const employee = await employeeService.getEmployeeById(employeeId);
-              if (employee) {
-                const attendance: Attendance = {
+              if (employeeId) {
+                const attendance = {
                   employeeId,
-                  date: new Date(),
+                  date: convertToUTC(date),
                   status: AttendanceStatus.PRESENT,
-                  checkIn: new Date(),
-                  checkOut: undefined,
+                  checkIn: status === null ? convertToUTC(date) : null,
+                  checkOut: null,
                   location: "",
-                  employeeName: employee.name,
-                  employeeSurname: employee.surname,
-                  designation: employee.designation,
                 };
-                await attendanceService.createAttendance(attendance);
+                await attendanceService.markAttendance(attendance);
                 showNotification("Attendance marked successfully", "success");
                 loadAttendances();
               }
@@ -377,7 +381,7 @@ const AttendancePage: React.FC = () => {
                 </Tabs>
                 <Box p={3}>
                   {activeTab === 0 ? (
-                    <PhysicalScanner />
+                    <PhysicalScanner onScanSuccess={handleScanSuccess} />
                   ) : activeTab === 1 ? (
                     <QRScanner onScanSuccess={handleScanSuccess} />
                   ) : (

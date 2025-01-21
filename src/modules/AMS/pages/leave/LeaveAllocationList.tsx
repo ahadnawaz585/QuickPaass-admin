@@ -16,17 +16,18 @@ import EmployeeAutocomplete from '@/components/shared/EmployeeAutoComplete/Emplo
 import { DataGrid, GridColDef, GridActionsCellItem, GridToolbar } from '@mui/x-data-grid';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import styles from './styles/LeaveManagement.module.scss';
+import { LeaveAnalytics } from './components/LeaveAnalytics';
+import styles from './styles/LeaveAllocationList.module.scss';
 import LeaveAllocService from '../../services/leaveAlloc.service';
 import EmployeeService from '../../services/employee.service';
 import LeaveConfigService from '../../services/leaveConfig.service';
-import { LeaveAllocation, LeaveConfiguration, LeaveRequest, LeaveStatus } from '@/types/AMS/leave';
+import { LeaveAllocation, LeaveConfiguration } from '@/types/AMS/leave';
 import { Employee } from '@/types/AMS/employee';
 import { formatDate } from '@/utils/date';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 
 // Extend Day.js with plugins
 dayjs.extend(utc);
@@ -36,26 +37,57 @@ const leaveAllocService = new LeaveAllocService();
 const employeeService = new EmployeeService();
 const leaveConfigService = new LeaveConfigService();
 
+const initialFormData = {
+    employeeId: '',
+    leaveConfigId: '',
+    assignedDays: 0,
+    note: '',
+    allocationStartDate: dayjs().tz("Asia/Karachi"),
+    allocationEndDate: dayjs().tz("Asia/Karachi"),
+};
+
 export const LeaveAllocationList = () => {
     const [allocations, setAllocations] = useState<LeaveAllocation[]>([]);
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [configs, setConfigs] = useState<LeaveConfiguration[]>([]);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState<Partial<any>>({
-        employeeId: '',
-        leaveConfigId: '',
-        assignedDays: 0,
-        note: '',
-        allocationStartDate: dayjs().tz("Asia/Karachi"),
-        allocationEndDate: dayjs().tz("Asia/Karachi"),
-    });
-
+    const [formData, setFormData] = useState<Partial<any>>(initialFormData);
     const [editId, setEditId] = useState<string | null>(null);
 
     useEffect(() => {
         loadData();
     }, []);
+
+    // Calculate end date based on start date and assigned days
+    useEffect(() => {
+        if (formData.allocationStartDate && formData.assignedDays > 0) {
+            const endDate = dayjs(formData.allocationStartDate).add(formData.assignedDays - 1, 'days');
+            setFormData(prev => ({
+                ...prev,
+                allocationEndDate: endDate
+            }));
+        }
+    }, [formData.allocationStartDate, formData.assignedDays]);
+
+    // Update dates and assigned days when leave type changes
+    useEffect(() => {
+        if (formData.leaveConfigId) {
+            const selectedConfig = configs.find(config => config.id === formData.leaveConfigId);
+            if (selectedConfig) {
+                const startDate = dayjs().tz("Asia/Karachi");
+                const assignedDays = selectedConfig.maxDays || 0;
+                const endDate = startDate.add(assignedDays - 1, 'days');
+                
+                setFormData(prev => ({
+                    ...prev,
+                    assignedDays,
+                    allocationStartDate: startDate,
+                    allocationEndDate: endDate
+                }));
+            }
+        }
+    }, [formData.leaveConfigId, configs]);
 
     const loadData = async () => {
         try {
@@ -66,7 +98,6 @@ export const LeaveAllocationList = () => {
                 leaveConfigService.getAllLeaveConfigurations(),
             ]);
 
-            // Enhance allocations with employee and config names for better filtering
             const enhancedAllocations = allocsData.map(alloc => ({
                 ...alloc,
                 employeeName: empsData.find(e => e.id === alloc.employeeId)?.name || 'N/A',
@@ -86,23 +117,16 @@ export const LeaveAllocationList = () => {
     const handleOpen = (allocation?: LeaveAllocation) => {
         if (allocation) {
             setFormData({
-                employeeId: allocation.employeeId,
-                leaveConfigId: allocation.leaveConfigId,
-                assignedDays: allocation.assignedDays,
-                note: allocation.note,
+                employeeId: allocation.employeeId || '',
+                leaveConfigId: allocation.leaveConfigId || '',
+                assignedDays: allocation.assignedDays || 0,
+                note: allocation.note || '',
                 allocationStartDate: dayjs(allocation.allocationStartDate),
-                allocationEndDate: allocation.allocationEndDate ? dayjs(allocation.allocationEndDate) : undefined,
+                allocationEndDate: allocation.allocationEndDate ? dayjs(allocation.allocationEndDate) : dayjs().tz("Asia/Karachi"),
             });
             setEditId(allocation.id);
         } else {
-            setFormData({
-                employeeId: '',
-                leaveConfigId: '',
-                assignedDays: 0,
-                note: '',
-                allocationStartDate: dayjs().tz("Asia/Karachi"),
-                allocationEndDate: dayjs().tz("Asia/Karachi"),
-            });
+            setFormData(initialFormData);
             setEditId(null);
         }
         setOpen(true);
@@ -110,17 +134,22 @@ export const LeaveAllocationList = () => {
 
     const handleClose = () => {
         setOpen(false);
-        setFormData({});
+        setFormData(initialFormData);
         setEditId(null);
     };
 
     const handleSubmit = async () => {
         try {
+            const dataToSubmit:any = {
+                ...formData,
+                allocationStartDate: formData.allocationStartDate.toISOString(),
+                allocationEndDate: formData.allocationEndDate.toISOString(),
+            };
+
             if (editId) {
-                console.log(editId);
-                await leaveAllocService.updateLeaveAllocation(editId, formData as LeaveAllocation);
+                await leaveAllocService.updateLeaveAllocation(editId, dataToSubmit);
             } else {
-                await leaveAllocService.createLeaveAllocation(formData as LeaveAllocation);
+                await leaveAllocService.createLeaveAllocation(dataToSubmit);
             }
             handleClose();
             loadData();
@@ -162,17 +191,14 @@ export const LeaveAllocationList = () => {
         {
             field: 'allocationStartDate',
             headerName: 'Start Date',
-            // type: 'date',
             width: 130,
             renderCell: (params) => formatDate(params.value)
         },
         {
             field: 'allocationEndDate',
             headerName: 'End Date',
-            // type: 'date',
             width: 130,
-            renderCell: (params) =>
-                params.value ? formatDate(params.value) : 'N/A',
+            renderCell: (params) => params.value ? formatDate(params.value) : 'N/A',
         },
         {
             field: 'note',
@@ -202,76 +228,68 @@ export const LeaveAllocationList = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <div className={styles.container}>
-                <div className={styles.header}>
-                    <h2>Leave Allocations</h2>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<AddIcon />}
-                        onClick={() => handleOpen()}
-                    >
-                        Add Allocation
-                    </Button>
+            <div className={styles.pageContainer}>
+                <div className={styles.mainContent}>
+                    <div className={styles.header}>
+                        <h2>Leave Allocations</h2>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<AddIcon />}
+                            onClick={() => handleOpen()}
+                        >
+                            Add Allocation
+                        </Button>
+                    </div>
+
+                    <div className={styles.dataGridContainer}>
+                        <DataGrid
+                            rows={allocations}
+                            columns={columns}
+                            loading={loading}
+                            initialState={{
+                                pagination: {
+                                    paginationModel: { pageSize: 10 },
+                                },
+                                density: "compact",
+                                sorting: {
+                                    sortModel: [{ field: 'allocationStartDate', sort: 'desc' }],
+                                },
+                            }}
+                            pageSizeOptions={[5, 10, 25, 50]}
+                            slots={{ toolbar: GridToolbar }}
+                            slotProps={{
+                                toolbar: {
+                                    showQuickFilter: true,
+                                    quickFilterProps: { debounceMs: 500 },
+                                },
+                            }}
+                            disableRowSelectionOnClick
+                            autoHeight
+                        />
+                    </div>
                 </div>
 
-                <div className={styles.dataGridContainer}>
-                    <DataGrid
-                        rows={allocations}
-                        columns={columns}
-                        loading={loading}
-                        initialState={{
-                            pagination: {
-                                paginationModel: { pageSize: 10 },
-                            },
-                            density: "compact",
-                            sorting: {
-                                sortModel: [{ field: 'allocationStartDate', sort: 'desc' }],
-                            },
-                        }}
-                        pageSizeOptions={[5, 10, 25, 50]}
-                        slots={{ toolbar: GridToolbar }}
-                        slotProps={{
-                            toolbar: {
-                                showQuickFilter: true,
-                                quickFilterProps: { debounceMs: 500 },
-                            },
-                        }}
-                        disableRowSelectionOnClick
-                        autoHeight
-                    />
+                <div className={styles.sidePanel}>
+                    <LeaveAnalytics allocations={allocations} />
                 </div>
 
                 <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
                     <DialogTitle>{editId ? 'Edit Allocation' : 'New Allocation'}</DialogTitle>
                     <DialogContent>
                         <div className={styles.formContainer}>
-                            {/* <FormControl fullWidth margin="normal">
-                                <InputLabel>Employee</InputLabel>
-                                <Select
-                                    value={formData.employeeId}
-                                    onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
-                                    required
-                                >
-                                    {employees.map((emp) => (
-                                        <MenuItem key={emp.id} value={emp.id}>
-                                            {emp.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl> */}
                             <EmployeeAutocomplete
                                 employees={employees}
                                 value={formData.employeeId}
-                                onChange={(employeeId) => setFormData({ ...formData, employeeId })}
-                                searchType="name" // or "code", depending on your search preference
+                                onChange={(employeeId) => setFormData(prev => ({ ...prev, employeeId }))}
+                                searchType="name"
                             />
 
                             <FormControl fullWidth margin="normal">
                                 <InputLabel>Leave Type</InputLabel>
                                 <Select
-                                    value={formData.leaveConfigId}
-                                    onChange={(e) => setFormData({ ...formData, leaveConfigId: e.target.value })}
+                                    value={formData.leaveConfigId || ''}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, leaveConfigId: e.target.value }))}
                                     required
                                 >
                                     {configs.map((config) => (
@@ -285,8 +303,11 @@ export const LeaveAllocationList = () => {
                             <TextField
                                 label="Assigned Days"
                                 type="number"
-                                value={formData.assignedDays}
-                                onChange={(e) => setFormData({ ...formData, assignedDays: parseInt(e.target.value) })}
+                                value={formData.assignedDays || 0}
+                                onChange={(e) => setFormData(prev => ({ 
+                                    ...prev, 
+                                    assignedDays: parseInt(e.target.value) || 0 
+                                }))}
                                 fullWidth
                                 required
                                 margin="normal"
@@ -297,31 +318,34 @@ export const LeaveAllocationList = () => {
                                 <DatePicker
                                     label="Start Date"
                                     value={formData.allocationStartDate}
-                                    onChange={(date) => setFormData({ ...formData, allocationStartDate: date || new Date() })}
+                                    onChange={(date) => setFormData(prev => ({
+                                        ...prev,
+                                        allocationStartDate: date || dayjs().tz("Asia/Karachi")
+                                    }))}
                                     className={styles.dateField}
                                     views={['day', 'month', 'year']}
                                     format="DD/MM/YYYY"
                                     slotProps={{
-                                        textField: { fullWidth: true, required: true },
+                                        textField: { fullWidth: true, required: true }
                                     }}
                                 />
                                 <DatePicker
                                     label="End Date"
                                     value={formData.allocationEndDate}
-                                    onChange={(date) => setFormData({ ...formData, allocationEndDate: date ?? undefined })}
+                                    disabled
                                     className={styles.dateField}
                                     views={['day', 'month', 'year']}
                                     format="DD/MM/YYYY"
                                     slotProps={{
-                                        textField: { fullWidth: true, required: true },
+                                        textField: { fullWidth: true }
                                     }}
                                 />
                             </div>
 
                             <TextField
                                 label="Note"
-                                value={formData.note}
-                                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                                value={formData.note || ''}
+                                onChange={(e) => setFormData(prev => ({ ...prev, note: e.target.value }))}
                                 fullWidth
                                 multiline
                                 rows={3}
@@ -335,11 +359,10 @@ export const LeaveAllocationList = () => {
                             onClick={handleSubmit}
                             variant="contained"
                             color="primary"
-                            disabled={!formData.employeeId || !formData.leaveConfigId || (formData?.assignedDays !== undefined && formData?.assignedDays < 0)}
+                            disabled={!formData.employeeId || !formData.leaveConfigId || formData.assignedDays <= 0}
                         >
                             Save
                         </Button>
-
                     </DialogActions>
                 </Dialog>
             </div>

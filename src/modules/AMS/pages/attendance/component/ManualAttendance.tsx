@@ -74,6 +74,7 @@ const ManualAttendance: React.FC<ManualAttendanceProps> = ({ onSubmit }) => {
         onSearchTypeChange={setSearchType}
       />
 
+
       <EmployeeAutocomplete
         employees={employees}
         value={employeeId}
