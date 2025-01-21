@@ -185,29 +185,31 @@ const AttendanceDataGrid: React.FC<AttendanceDataGridProps> = ({
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <div className="filters">
               <div className="date-pickers">
-                <DatePicker
+              <DatePicker
                   label="From Date"
                   value={fromDate}
-                  onChange={setFromDate}
-                  views={['day', 'month', 'year']}
-                                format="DD/MM/YYYY"
+                      views={['day', 'month', 'year']}
+                                // format="DD/MM/YYYY"
+                  onChange={(newValue) => setFromDate(newValue)}
                   slotProps={{
                     textField: {
                       fullWidth: true,
                       margin: "normal",
+                      required: true,
                     },
                   }}
                 />
                 <DatePicker
                   label="To Date"
                   value={toDate}
-                  onChange={setToDate}
-                  views={['day', 'month', 'year']}
-                                format="DD/MM/YYYY"
+                        views={['day', 'month', 'year']}
+                                // format="DD/MM/YYYY"
+                  onChange={(newValue) => setToDate(newValue)}
                   slotProps={{
                     textField: {
                       fullWidth: true,
                       margin: "normal",
+                      required: true,
                     },
                   }}
                 />

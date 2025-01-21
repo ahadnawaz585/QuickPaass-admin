@@ -380,7 +380,7 @@ export const LeaveRequestList = () => {
                                 margin="normal"
                             />
 
-                            {editId && (
+                            {!editId && (
                                 <FormControl fullWidth margin="normal">
                                     <InputLabel>Status</InputLabel>
                                     <Select
