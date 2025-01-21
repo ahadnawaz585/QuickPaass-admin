@@ -23,9 +23,25 @@ import {
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
 import AttendanceService from "@/modules/AMS/services/attendance.service";
-import AttendanceDataGrid, { Attendance } from "../../../Attendance/AttendanceDataGrid";
+import AttendanceDataGrid from "../../../Attendance/AttendanceDataGrid";
 import { AttendanceStatus } from "@/modules/AMS/pages/attendance/attendance";
 import '../../styles/AttendanceTab.scss';
+interface Attendance {
+  id?: string;
+  employeeId: string;
+  date: Date;
+  status: string;
+  checkIn?: Date | null;
+  checkOut?: Date | null;
+  location?: string;
+  createdAt?: Date;
+  updatedAt?: Date | undefined;
+  isDeleted?: Date | undefined;
+  employeeName: string;
+  employeeSurname: string;
+  designation: string;
+  code?: string;
+}
 import { useRouter, useParams } from 'next/navigation';
 ChartJS.register(
   CategoryScale,
