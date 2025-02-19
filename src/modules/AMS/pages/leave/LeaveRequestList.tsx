@@ -47,7 +47,7 @@ interface LeaveRequest {
 }
 
 import { Employee } from '@/types/AMS/employee';
-import { formatTime } from '@/utils/date';
+import { formatDate, formatTime } from '@/utils/date';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 const leaveReqService = new LeaveReqService();
 const employeeService = new EmployeeService();
@@ -196,14 +196,14 @@ export const LeaveRequestList = () => {
             headerName: 'Start Date',
             // type: 'date',
             width: 130,
-            renderCell: (params) => formatTime(params.value),
+            renderCell: (params) => formatDate(params.value),
         },
         {
             field: 'endDate',
             headerName: 'End Date',
             // type: 'date',
             width: 130,
-            renderCell: (params) => formatTime(params.value),
+            renderCell: (params) => formatDate(params.value),
         },
         {
             field: 'reason',
