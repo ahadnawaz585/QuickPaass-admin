@@ -17,6 +17,16 @@ class LeaveAllocService extends BaseService {
       });
   }
 
+  getAllLeaveAllocationsByEmployeeId(employeeId:string) {
+    return axiosInstance
+      .post<LeaveAllocation[]>(`${this.baseUrl}/getByEmployeeId`,{employeeId})
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error fetching all leave allocations", error);
+        throw error;
+      });
+  }
+
   getLeaveAllocations(page: number, pageSize: number) {
     return axiosInstance
       .post<paginatedData>(`${this.baseUrl}/get`, { page, pageSize })

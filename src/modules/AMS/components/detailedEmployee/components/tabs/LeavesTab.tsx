@@ -41,7 +41,7 @@ const LeavesTab = () => {
   const employeeId: string = Array.isArray(id) ? id[0] : id;
 
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
-  const [leaveAllocation, setLeaveAllocation] = useState<LeaveAllocation | null>(null);
+  const [leaveAllocation, setLeaveAllocation] = useState<LeaveAllocation[]>([]);
   const [loading, setLoading] = useState(true);
 
   const leaveReqService = new LeaveReqService();
@@ -52,11 +52,11 @@ const LeavesTab = () => {
       try {
         const [requests, allocations] = await Promise.all([
           leaveReqService.getLeaveRequestsByEmployeeId(employeeId),
-          leaveAllocService.getAllLeaveAllocations(),
+          leaveAllocService.getAllLeaveAllocationsByEmployeeId(employeeId),
         ]);
 
         setLeaveRequests(requests);
-        setLeaveAllocation(allocations.find(a => a.employeeId === employeeId) || null);
+        setLeaveAllocation(allocations);
       } catch (error) {
         console.error('Error fetching leave data:', error);
       } finally {
@@ -100,19 +100,19 @@ const LeavesTab = () => {
     <div className="leaves-dashboard">
       {/* Stats Cards */}
       <div className="stats-cards">
-        <Card className="stat-card">
-          <CardContent>
-            <Box display="flex" alignItems="center" gap={1}>
-              <CalendarMonth color="primary" />
-              <Typography variant="h6">Total Leave Balance</Typography>
-            </Box>
-            <Typography variant="h4" mt={2}>
-              {leaveAllocation?.assignedDays || 0} days
-            </Typography>
-          </CardContent>
-        </Card>
+          {/* <Card className="stat-card">
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={1}>
+                <CalendarMonth color="primary" />
+                <Typography variant="h6">Total Leave Balance</Typography>
+              </Box>
+              <Typography variant="h4" mt={2}>
+                {leaveAllocation?.assignedDays || 0} days
+              </Typography>
+            </CardContent>
+          </Card> */}
 
-        <Card className="stat-card">
+        {/* <Card className="stat-card">
           <CardContent>
             <Box display="flex" alignItems="center" gap={1}>
               <CheckCircle color="success" />
@@ -122,7 +122,7 @@ const LeavesTab = () => {
               {leaveAllocation?.assignedDays || 0} days
             </Typography>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card className="stat-card">
           <CardContent>
@@ -153,7 +153,7 @@ const LeavesTab = () => {
 
       {/* Leave History Table */}
       <Box className="leave-history">
-        <Typography variant="h6" mb={2}>Leave History</Typography>
+        <Typography variant="h6" mb={2}>Leave Requests</Typography>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
