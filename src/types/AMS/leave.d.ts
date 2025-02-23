@@ -35,6 +35,7 @@ export enum LeaveStatus {
     leaveConfigId?: string;
     assignedDays: number; 
     note?: string; 
+    leaveConfig?:any,
     allocationStartDate: Date; // Added field for allocation start date
     allocationEndDate?: Date; // Added optional field for allocation end date
     createdAt?: Date;

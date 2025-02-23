@@ -50,6 +50,17 @@ class AttendanceService extends BaseService {
       });
   }
 
+  getSpecificAttendances(employeeId: string, type: string) {
+    return axiosInstance
+      .post<any>(`${this.baseUrl}/specific`, { employeeId, type }) // Send `type` inside body
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error("Error fetching Attendances", error);
+        throw error;
+      });
+}
+
+
   getAttendances(page: number, pageSize: number) {
     return axiosInstance
       .post<paginatedData>(`${this.baseUrl}/get`, { page, pageSize })

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import {
@@ -14,12 +16,13 @@ import {
   TableRow,
   Paper,
   CircularProgress,
+  Grid,
 } from '@mui/material';
 import {
-  Timeline,
   CalendarMonth,
-  HourglassEmpty,
+  EventBusy,
   CheckCircle,
+  HourglassEmpty,
 } from '@mui/icons-material';
 import {
   BarChart,
@@ -29,12 +32,18 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from 'recharts';
 import LeaveReqService from '@/modules/AMS/services/leaveReq.service';
 import LeaveAllocService from '@/modules/AMS/services/leaveAlloc.service';
 import { LeaveRequest, LeaveAllocation } from '@/types/AMS/leave';
-import '../../styles/LeaveTab.scss';
 import { formatDate } from '@/utils/date';
+import AttendanceService from '@/modules/AMS/services/attendance.service';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const LeavesTab = () => {
   const { id }: any = useParams();
@@ -42,21 +51,25 @@ const LeavesTab = () => {
 
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [leaveAllocation, setLeaveAllocation] = useState<LeaveAllocation[]>([]);
+  const [attendances, setAttendances] = useState<{date: String}[]>([]);
   const [loading, setLoading] = useState(true);
 
   const leaveReqService = new LeaveReqService();
   const leaveAllocService = new LeaveAllocService();
+  const attendanceService = new AttendanceService();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [requests, allocations] = await Promise.all([
+        const [requests, allocations, attendances] = await Promise.all([
           leaveReqService.getLeaveRequestsByEmployeeId(employeeId),
           leaveAllocService.getAllLeaveAllocationsByEmployeeId(employeeId),
+          attendanceService.getSpecificAttendances(employeeId, 'ON_LEAVE')
         ]);
 
         setLeaveRequests(requests);
         setLeaveAllocation(allocations);
+        setAttendances(attendances);
       } catch (error) {
         console.error('Error fetching leave data:', error);
       } finally {
@@ -82,9 +95,21 @@ const LeavesTab = () => {
     const rejected = leaveRequests.filter(r => r.status === 'REJECTED').length;
 
     return [
-      { name: 'Approved', value: approved, color: '#4caf50' },
-      { name: 'Pending', value: pending, color: '#ff9800' },
-      { name: 'Rejected', value: rejected, color: '#f44336' },
+      { name: 'Approved', value: approved, color: '#00C49F' },
+      { name: 'Pending', value: pending, color: '#FFBB28' },
+      { name: 'Rejected', value: rejected, color: '#FF8042' }
+    ];
+  };
+
+  const calculateLeaveBalance = () => {
+    const totalAllocated = leaveAllocation.reduce((sum, allocation) => 
+      sum + allocation.assignedDays, 0);
+    const totalUsed = attendances.length;
+    const remaining = totalAllocated - totalUsed;
+
+    return [
+      { name: 'Used', value: totalUsed, color: '#0088FE' },
+      { name: 'Remaining', value: remaining, color: '#00C49F' }
     ];
   };
 
@@ -97,103 +122,216 @@ const LeavesTab = () => {
   }
 
   return (
-    <div className="leaves-dashboard">
-      {/* Stats Cards */}
-      <div className="stats-cards">
-          {/* <Card className="stat-card">
+    <Box sx={{ p: 3 }}>
+      <Grid container spacing={3}>
+        {/* Summary Cards */}
+        <Grid item xs={12} md={3}>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
                 <CalendarMonth color="primary" />
-                <Typography variant="h6">Total Leave Balance</Typography>
+                <Typography variant="h6">Total Allocated</Typography>
               </Box>
-              <Typography variant="h4" mt={2}>
-                {leaveAllocation?.assignedDays || 0} days
+              <Typography variant="h4">
+                {leaveAllocation.reduce((sum, allocation) => 
+                  sum + allocation.assignedDays, 0)} days
               </Typography>
             </CardContent>
-          </Card> */}
+          </Card>
+        </Grid>
 
-        {/* <Card className="stat-card">
-          <CardContent>
-            <Box display="flex" alignItems="center" gap={1}>
-              <CheckCircle color="success" />
-              <Typography variant="h6">Used Leaves</Typography>
-            </Box>
-            <Typography variant="h4" mt={2}>
-              {leaveAllocation?.assignedDays || 0} days
-            </Typography>
-          </CardContent>
-        </Card> */}
+        <Grid item xs={12} md={3}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <CheckCircle color="success" />
+                <Typography variant="h6">Used Leaves</Typography>
+              </Box>
+              <Typography variant="h4">
+                {attendances.length} days
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
 
-        <Card className="stat-card">
-          <CardContent>
-            <Box display="flex" alignItems="center" gap={1}>
-              <HourglassEmpty color="warning" />
-              <Typography variant="h6">Pending Requests</Typography>
-            </Box>
-            <Typography variant="h4" mt={2}>
-              {leaveRequests.filter(r => r.status === 'PENDING').length}
-            </Typography>
-          </CardContent>
-        </Card>
-      </div>
+        <Grid item xs={12} md={3}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <EventBusy color="info" />
+                <Typography variant="h6">Remaining</Typography>
+              </Box>
+              <Typography variant="h4">
+                {leaveAllocation.reduce((sum, allocation) => 
+                  sum + allocation.assignedDays, 0) - attendances.length} days
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      {/* Leave Statistics Chart */}
-      <Box className="chart-container">
-        <Typography variant="h6" mb={2}>Leave Statistics</Typography>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={calculateLeaveStats()}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      </Box>
+        <Grid item xs={12} md={3}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <HourglassEmpty color="warning" />
+                <Typography variant="h6">Pending</Typography>
+              </Box>
+              <Typography variant="h4">
+                {leaveRequests.filter(r => r.status === 'PENDING').length}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      {/* Leave History Table */}
-      <Box className="leave-history">
-        <Typography variant="h6" mb={2}>Leave Requests</Typography>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Start Date</TableCell>
-                <TableCell>End Date</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Duration</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Reason</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {leaveRequests.map((request, index) => (
-                <TableRow key={index}>
-                  <TableCell>{formatDate(new Date(request.startDate).toLocaleDateString())}</TableCell>
-                  <TableCell>{formatDate(new Date(request.endDate).toLocaleDateString())}</TableCell>
-                  <TableCell>{request.reason}</TableCell>
-                  <TableCell>
-                    {Math.ceil(
-                      (new Date(request.endDate).getTime() - new Date(request.startDate).getTime()) / (1000 * 60 * 60 * 24)
-                    )}{' '}
-                    days
-                  </TableCell>
+        {/* Charts */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ height: '400px', p: 2 }}>
+            <Typography variant="h6" mb={2}>Leave Balance</Typography>
+            <ResponsiveContainer width="100%" height="85%">
+              <PieChart>
+                <Pie
+                  data={calculateLeaveBalance()}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: ${value}`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {calculateLeaveBalance().map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+        </Grid>
 
-                  <TableCell>
-                    <Chip
-                      label={request.status}
-                      color={getStatusColor(request.status)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>{request.reason}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-    </div>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ height: '400px', p: 2 }}>
+            <Typography variant="h6" mb={2}>Leave Request Status</Typography>
+            <ResponsiveContainer width="100%" height="85%">
+              <BarChart data={calculateLeaveStats()}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#8884d8">
+                  {calculateLeaveStats().map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Grid>
+
+        {/* Tables */}
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" mb={2}>Leave Requests History</Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Start Date</TableCell>
+                      <TableCell>End Date</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell>Duration</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Reason</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {leaveRequests.map((request, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{formatDate(new Date(request.startDate).toLocaleDateString())}</TableCell>
+                        <TableCell>{formatDate(new Date(request.endDate).toLocaleDateString())}</TableCell>
+                        <TableCell>{request.reason}</TableCell>
+                        <TableCell>
+                          {Math.ceil(
+                            (new Date(request.endDate).getTime() - new Date(request.startDate).getTime()) / 
+                            (1000 * 60 * 60 * 24)
+                          )} days
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={request.status}
+                            color={getStatusColor(request.status)}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>{request.reason}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" mb={2}>Leave Allocations</Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Start Date</TableCell>
+                      <TableCell>End Date</TableCell>
+                      <TableCell>Assigned Days</TableCell>
+                      <TableCell>Leave Type</TableCell>
+                      <TableCell>Note</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {leaveAllocation.map((allocation, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{formatDate(allocation.allocationStartDate.toString())}</TableCell>
+                        <TableCell>{formatDate(allocation.allocationEndDate?.toString() || '')}</TableCell>
+                        <TableCell>{allocation.assignedDays}</TableCell>
+                        <TableCell>{allocation?.leaveConfig?.name || '-'}</TableCell>
+                        <TableCell>{allocation.note || '-'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" mb={2}>Leaves Taken</Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Date</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {attendances.map((attendance, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{formatDate(attendance.date.toString())}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 

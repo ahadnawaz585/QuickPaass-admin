@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import {
   Paper,
@@ -7,8 +9,19 @@ import {
   Card,
   CardContent,
   IconButton,
+  Grid,
+  Chip,
+  useTheme,
 } from "@mui/material";
-import {Close} from "@mui/icons-material"
+import {
+  Close,
+  AccessTime,
+  CheckCircle,
+  Cancel,
+  TimerOff,
+  BeachAccess,
+  TrendingUp,
+} from "@mui/icons-material";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -21,11 +34,13 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
-import { Line, Doughnut } from 'react-chartjs-2';
+import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import AttendanceService from "@/modules/AMS/services/attendance.service";
 import AttendanceDataGrid from "../../../Attendance/AttendanceDataGrid";
 import { AttendanceStatus } from "@/modules/AMS/pages/attendance/attendance";
 import '../../styles/AttendanceTab.scss';
+import { useParams } from "next/navigation";
+
 interface Attendance {
   id?: string;
   employeeId: string;
@@ -42,7 +57,7 @@ interface Attendance {
   designation: string;
   code?: string;
 }
-import { useRouter, useParams } from 'next/navigation';
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -56,11 +71,12 @@ ChartJS.register(
 );
 
 const AttendanceTab = () => {
+  const theme = useTheme();
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [filteredAttendances, setFilteredAttendances] = useState<Attendance[]>([]);
   const [activeFilter, setActiveFilter] = useState<AttendanceStatus | null>(null);
-      const { id }: any = useParams();
-      const employeeId: string = Array.isArray(id) ? id[0] : id;
+  const { id }: any = useParams();
+  const employeeId: string = Array.isArray(id) ? id[0] : id;
   const [loading, setLoading] = useState<boolean>(true);
   const service = new AttendanceService();
 
@@ -70,7 +86,9 @@ const AttendanceTab = () => {
     totalLates: 0,
     totalLeaves: 0,
     avgCheckIn: "00:00",
-    avgCheckOut: "00:00"
+    avgCheckOut: "00:00",
+    attendanceRate: 0,
+    punctualityRate: 0
   });
 
   const fetchAttendances = async (from: Date | null, to: Date | null) => {
@@ -85,10 +103,6 @@ const AttendanceTab = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDateRangeChange = (fromDate: Date | null, toDate: Date | null) => {
-    fetchAttendances(fromDate, toDate);
   };
 
   const calculateStats = (data: Attendance[]) => {
@@ -109,6 +123,10 @@ const AttendanceTab = () => {
       if (att.checkOut) totalCheckOut += new Date(att.checkOut).getHours() * 60 + new Date(att.checkOut).getMinutes();
     });
 
+    const totalDays = data.length;
+    const attendanceRate = ((presents + lates) / totalDays) * 100;
+    const punctualityRate = (presents / (presents + lates)) * 100;
+
     const avgCheckInMinutes = totalCheckIn / data.length;
     const avgCheckOutMinutes = totalCheckOut / data.length;
 
@@ -124,7 +142,13 @@ const AttendanceTab = () => {
       totalLeaves: leaves,
       avgCheckIn: `${avgCheckInHours}:${avgCheckInRemainingMinutes < 10 ? '0' : ''}${avgCheckInRemainingMinutes}`,
       avgCheckOut: `${avgCheckOutHours}:${avgCheckOutRemainingMinutes < 10 ? '0' : ''}${avgCheckOutRemainingMinutes}`,
+      attendanceRate: Math.round(attendanceRate),
+      punctualityRate: Math.round(punctualityRate)
     });
+  };
+
+  const handleDateRangeChange = (fromDate: Date | null, toDate: Date | null) => {
+    fetchAttendances(fromDate, toDate);
   };
 
   const handleStatClick = (status: AttendanceStatus) => {
@@ -143,7 +167,6 @@ const AttendanceTab = () => {
   };
 
   useEffect(() => {
-    console.log(employeeId);
     fetchAttendances(null, null);
   }, [employeeId]);
 
@@ -151,7 +174,12 @@ const AttendanceTab = () => {
     labels: ['Present', 'Absent', 'Late', 'Leave'],
     datasets: [{
       data: [stats.totalPresents, stats.totalAbsents, stats.totalLates, stats.totalLeaves],
-      backgroundColor: ['#4CAF50', '#f44336', '#ff9800', '#2196f3'],
+      backgroundColor: [
+        theme.palette.success.main,
+        theme.palette.error.main,
+        theme.palette.warning.main,
+        theme.palette.info.main
+      ],
       borderWidth: 1,
     }],
   };
@@ -166,132 +194,264 @@ const AttendanceTab = () => {
         att.checkIn ? new Date(att.checkIn).getHours() +
           (new Date(att.checkIn).getMinutes() / 60) : null
       ),
-      borderColor: '#2196f3',
+      borderColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.primary.light,
       tension: 0.4,
+      fill: true,
     }],
   };
 
-  const handleRowClick = (params: any) => {
-    console.log("Row clicked:", params);
+  const monthlyTrendData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [
+      {
+        label: 'Attendance Rate',
+        data: [95, 92, 88, 94, 91, stats.attendanceRate],
+        borderColor: theme.palette.success.main,
+        backgroundColor: theme.palette.success.light,
+        yAxisID: 'y',
+      },
+      {
+        label: 'Punctuality Rate',
+        data: [90, 88, 85, 92, 87, stats.punctualityRate],
+        borderColor: theme.palette.info.main,
+        backgroundColor: theme.palette.info.light,
+        yAxisID: 'y',
+      },
+    ],
   };
 
-  const statItems = [
-    { title: 'Total Presents', value: stats.totalPresents, status: AttendanceStatus.PRESENT },
-    { title: 'Total Absents', value: stats.totalAbsents, status: AttendanceStatus.ABSENT },
-    { title: 'Total Lates', value: stats.totalLates, status: AttendanceStatus.LATE },
-    { title: 'Total Leaves', value: stats.totalLeaves, status: AttendanceStatus.ON_LEAVE },
-    { title: 'Average Check In', value: stats.avgCheckIn },
-    { title: 'Average Check Out', value: stats.avgCheckOut },
+  const statCards = [
+    {
+      title: 'Present',
+      value: stats.totalPresents,
+      icon: <CheckCircle sx={{ color: theme.palette.success.main }} />,
+      status: AttendanceStatus.PRESENT,
+      color: theme.palette.success.light,
+    },
+    {
+      title: 'Absent',
+      value: stats.totalAbsents,
+      icon: <Cancel sx={{ color: theme.palette.error.main }} />,
+      status: AttendanceStatus.ABSENT,
+      color: theme.palette.error.light,
+    },
+    {
+      title: 'Late',
+      value: stats.totalLates,
+      icon: <TimerOff sx={{ color: theme.palette.warning.main }} />,
+      status: AttendanceStatus.LATE,
+      color: theme.palette.warning.light,
+    },
+    {
+      title: 'Leave',
+      value: stats.totalLeaves,
+      icon: <BeachAccess sx={{ color: theme.palette.info.main }} />,
+      status: AttendanceStatus.ON_LEAVE,
+      color: theme.palette.info.light,
+    },
   ];
 
   return (
-    <div className="attendance-container">
-      <Box className="attendance-header">
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h4" component="h1">
-          Attendance Report
+          Attendance Dashboard
           {activeFilter && (
-            <IconButton 
-              onClick={clearFilter}
-              size="small"
-              className="clear-filter-btn"
-            >
+            <IconButton onClick={clearFilter} size="small" sx={{ ml: 1 }}>
               <Close fontSize="small"/>
             </IconButton>
           )}
         </Typography>
+        <Box>
+          <Chip 
+            icon={<TrendingUp />} 
+            label={`Attendance Rate: ${stats.attendanceRate}%`} 
+            color="success" 
+            sx={{ mr: 1 }}
+          />
+          <Chip 
+            icon={<AccessTime />} 
+            label={`Punctuality Rate: ${stats.punctualityRate}%`} 
+            color="primary" 
+          />
+        </Box>
       </Box>
 
-      <div className="attendance-content">
-        <div className="attendance-main">
-        <div className="attendance-stats">
-            {statItems.map((stat, index) => (
-              <Card 
-                key={index} 
-                className={`stat-item ${stat.status && activeFilter === stat.status ? 'active' : ''}`}
-                onClick={() => stat.status && handleStatClick(stat.status)}
-                style={{ cursor: stat.status ? 'pointer' : 'default' }}
-              >
-                <CardContent>
-                  <Typography className="stat-title">
+      <Grid container spacing={3}>
+        {/* Stat Cards */}
+        {statCards.map((stat, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card 
+              onClick={() => stat.status && handleStatClick(stat.status)}
+              sx={{
+                cursor: 'pointer',
+                bgcolor: activeFilter === stat.status ? stat.color : 'background.paper',
+                transition: 'all 0.3s',
+                '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 }
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  {stat.icon}
+                  <Typography variant="h6" sx={{ ml: 1 }}>
                     {stat.title}
                   </Typography>
-                  <Typography className="stat-value">
-                    {stat.value}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <Paper className="attendance-data-grid">
+                </Box>
+                <Typography variant="h4">
+                  {stat.value}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+
+        {/* Time Stats */}
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <AccessTime color="primary" />
+                <Typography variant="h6" sx={{ ml: 1 }}>
+                  Avg. Check-in
+                </Typography>
+              </Box>
+              <Typography variant="h4">{stats.avgCheckIn}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <AccessTime color="secondary" />
+                <Typography variant="h6" sx={{ ml: 1 }}>
+                  Avg. Check-out
+                </Typography>
+              </Box>
+              <Typography variant="h4">{stats.avgCheckOut}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Charts */}
+
+
+                {/* Attendance Grid */}
+                <Grid item xs={12}>
+          <Paper sx={{ p: 3, position: 'relative' }}>
+            <Typography variant="h6" gutterBottom>
+              Detailed Attendance Records
+            </Typography>
             <AttendanceDataGrid
               showExtras={false}
               attendances={filteredAttendances}
-              onRowClick={handleRowClick}
               onDateRangeChange={handleDateRangeChange}
             />
             {loading && (
-              <Box className="loading-overlay">
+              <Box sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'rgba(255, 255, 255, 0.7)',
+              }}>
                 <CircularProgress />
               </Box>
             )}
           </Paper>
+        </Grid>
 
-       
-
-          <div className="charts-section">
-            <Paper className="chart-wrapper">
-              <Typography variant="h6" gutterBottom>
-                Attendance Distribution
-              </Typography>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3, height: '400px' }}>
+            <Typography variant="h6" gutterBottom>
+              Attendance Distribution
+            </Typography>
+            <Box sx={{ height: 'calc(100% - 40px)' }}>
               <Doughnut
                 data={attendanceDistributionData}
                 options={{
                   responsive: true,
-                  maintainAspectRatio: true,
+                  maintainAspectRatio: false,
                   plugins: {
                     legend: {
                       position: 'bottom',
-                      labels: {
-                        padding: 20,
-                        usePointStyle: true,
-                      },
+                      labels: { padding: 20, usePointStyle: true },
                     },
                   },
                 }}
               />
-            </Paper>
+            </Box>
+          </Paper>
+        </Grid>
 
-            <Paper className="chart-wrapper">
-              <Typography variant="h6" gutterBottom>
-                Check-in Time Trend (Last 7 Days)
-              </Typography>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3, height: '400px' }}>
+            <Typography variant="h6" gutterBottom>
+              Check-in Time Trend (Last 7 Days)
+            </Typography>
+            <Box sx={{ height: 'calc(100% - 40px)' }}>
               <Line
                 data={checkInTrendData}
                 options={{
                   responsive: true,
-                  maintainAspectRatio: true,
+                  maintainAspectRatio: false,
                   scales: {
                     y: {
                       min: 6,
                       max: 12,
-                      title: {
-                        display: true,
-                        text: 'Hour of Day',
-                      },
+                      title: { display: true, text: 'Hour of Day' },
                     },
                   },
                   plugins: {
-                    legend: {
-                      display: false,
-                    },
+                    legend: { display: false },
                   },
                 }}
               />
-            </Paper>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Box>
+          </Paper>
+        </Grid>
+
+     
+
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, height: '400px' }}>
+            <Typography variant="h6" gutterBottom>
+              Monthly Attendance & Punctuality Trends
+            </Typography>
+            <Box sx={{ height: 'calc(100% - 40px)' }}>
+              <Bar
+                data={monthlyTrendData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    y: {
+                      type: 'linear',
+                      display: true,
+                      position: 'left',
+                      min: 0,
+                      max: 100,
+                      title: { display: true, text: 'Percentage (%)' },
+                    },
+                  },
+                  plugins: {
+                    legend: { position: 'bottom' },
+                  },
+                }}
+              />
+            </Box>
+          </Paper>
+        </Grid>
+
+   
+      </Grid>
+    </Box>
   );
 };
 
