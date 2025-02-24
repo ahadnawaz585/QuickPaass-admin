@@ -4,7 +4,7 @@ import FaceMatching from '@/modules/AMS/components/faceMatching/faceMatching';
 const page = () => {
   return (
     <>
-test
+      <FaceMatching />
     </>
   )
 }

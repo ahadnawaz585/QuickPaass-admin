@@ -30,6 +30,9 @@ class AttendanceService extends BaseService {
       });
   }
 
+
+
+
   getDatedAttendances(from:Date|null, to: Date|null) {
     return axiosInstance
       .post<any>(`${this.baseUrl}/getDate`, { from, to })
@@ -103,6 +106,15 @@ class AttendanceService extends BaseService {
   markAttendance(AttendanceData: Attendance){
     return axiosInstance
     .post<void>(`${this.baseUrl}/markAttendance`, AttendanceData)
+    .catch((error) => {
+      console.error("Error marking Attendance", error);
+      throw error;
+    });
+  }
+
+  faceAttendance(image:string){
+    return axiosInstance
+    .post<void>(`${this.baseUrl}/face-attendance`, {image})
     .catch((error) => {
       console.error("Error marking Attendance", error);
       throw error;
